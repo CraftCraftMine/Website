@@ -6,46 +6,49 @@
     <title>CraftCraftMine | Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #0f172a; color: #f1f5f9; font-family: 'Inter', sans-serif; }
+        body { background-color: #0f172a; color: #f1f5f9; font-family: 'Inter', sans-serif; overflow-x: hidden; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
         .accent-gradient { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
+        .slider-container { display: flex; transition: transform 0.5s ease-in-out; }
     </style>
 </head>
 <body class="min-h-screen">
 
     <div class="accent-gradient py-2 text-center text-sm font-bold shadow-md">
-        <span>📢 NEWS: Wartungsarbeiten am Freitag | Neues Wirtschaftssystem online!</span>
+        <span>📢 Aktuell: Die Server-Messe 2026 hat ihre Tore geöffnet! Schau vorbei.</span>
     </div>
 
     <div class="max-w-6xl mx-auto px-6 py-10">
         
         <header class="flex justify-between items-center mb-12">
             <div>
-                <h1 class="text-3xl font-extrabold tracking-tight">CRAFTCRAFT<span class="text-blue-500">MINE</span></h1>
-                <p class="text-gray-400">Dein Premium Minecraft Netzwerk</p>
+                <h1 class="text-3xl font-extrabold tracking-tight uppercase">CRAFTCRAFT<span class="text-blue-500">MINE</span></h1>
+                <p class="text-gray-400 font-medium">Dein Community Minecraft Netzwerk</p>
             </div>
-            <img src="HIER_DEIN_LOGO_RAW_LINK" alt="Logo" class="w-20 h-20 rounded-2xl shadow-2xl border-2 border-blue-500/30">
+            <img src="DEIN_LOGO_LINK" alt="Logo" class="w-20 h-20 rounded-2xl shadow-2xl border-2 border-blue-500/30 object-cover">
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
             <div class="lg:col-span-2 space-y-6">
                 <div class="glass rounded-3xl p-2 relative overflow-hidden group">
-                    <div id="slider" class="flex transition-transform duration-500 ease-in-out">
+                    <div id="slider" class="slider-container">
+                        
                         <div class="min-w-full p-6 flex flex-col md:flex-row gap-6 items-center">
-                            <img src="https://via.placeholder.com/300x200/1e293b/ffffff?text=Messe+2026" class="rounded-xl w-full md:w-1/2 object-cover h-48">
-                            <div>
-                                <span class="bg-blue-500/20 text-blue-400 text-xs px-2 py-1 rounded uppercase font-bold">Event</span>
-                                <h3 class="text-2xl font-bold mt-2">Server-Messe 2026</h3>
-                                <p class="text-gray-400 mt-2 text-sm leading-relaxed">Erkunde die riesige Messehalle und entdecke neue Projekte unserer Spieler.</p>
+                            <img src="https://via.placeholder.com/300x200/1e293b/ffffff?text=Messe+2026" class="rounded-xl w-full md:w-1/2 h-48 object-cover">
+                            <div class="flex-1">
+                                <h3 class="text-2xl font-bold">Server-Messe 2026</h3>
+                                <p class="text-gray-400 mt-2 text-sm leading-relaxed mb-4">Erkunde die riesige Messehalle und entdecke neue Projekte unserer Spieler.</p>
+                                <a href="https://DEIN-GITBOOK-LINK" class="inline-block bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-sm font-bold transition">Zum Wiki</a>
                             </div>
                         </div>
+
                         <div class="min-w-full p-6 flex flex-col md:flex-row gap-6 items-center">
-                            <img src="https://via.placeholder.com/300x200/1e293b/ffffff?text=Bedrock+Support" class="rounded-xl w-full md:w-1/2 object-cover h-48">
-                            <div>
-                                <span class="bg-green-500/20 text-green-400 text-xs px-2 py-1 rounded uppercase font-bold">Update</span>
-                                <h3 class="text-2xl font-bold mt-2">Jetzt auch für Bedrock</h3>
-                                <p class="text-gray-400 mt-2 text-sm leading-relaxed">Dank Geyser-Support könnt ihr jetzt auch mit Handy und Konsole beitreten!</p>
+                            <img src="https://via.placeholder.com/300x200/1e293b/ffffff?text=Video+Trailer" class="rounded-xl w-full md:w-1/2 h-48 object-cover">
+                            <div class="flex-1">
+                                <h3 class="text-2xl font-bold">Unser neuer Trailer</h3>
+                                <p class="text-gray-400 mt-2 text-sm leading-relaxed mb-4">Schau dir die Highlights der letzten Season auf YouTube an.</p>
+                                <a href="https://youtube.com/..." class="inline-block bg-red-600 hover:bg-red-500 px-4 py-2 rounded-lg text-sm font-bold transition">Video ansehen</a>
                             </div>
                         </div>
                     </div>
@@ -56,60 +59,66 @@
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     <a href="http://map.craftcraftmine.net:30486" class="glass p-4 rounded-2xl text-center hover:bg-blue-600/20 transition">
                         <div class="text-2xl mb-1">🗺️</div>
-                        <span class="text-xs font-bold uppercase tracking-widest">Karte</span>
+                        <span class="text-[10px] font-bold uppercase tracking-widest">Karte</span>
                     </a>
                     <a href="https://status.craftcraftmine.net" class="glass p-4 rounded-2xl text-center hover:bg-green-600/20 transition">
                         <div class="text-2xl mb-1">📈</div>
-                        <span class="text-xs font-bold uppercase tracking-widest">Status</span>
+                        <span class="text-[10px] font-bold uppercase tracking-widest">Status</span>
                     </a>
-                    <a href="https://DEIN-GITBOOK" class="glass p-4 rounded-2xl text-center hover:bg-purple-600/20 transition">
+                    <a href="https://DEIN-GITBOOK" class="glass p-4 rounded-2xl text-center hover:bg-orange-600/20 transition">
                         <div class="text-2xl mb-1">📖</div>
-                        <span class="text-xs font-bold uppercase tracking-widest">Wiki</span>
+                        <span class="text-[10px] font-bold uppercase tracking-widest">Wiki</span>
                     </a>
                     <a href="https://discord.gg/DEIN-LINK" class="glass p-4 rounded-2xl text-center hover:bg-indigo-600/20 transition">
                         <div class="text-2xl mb-1">💬</div>
-                        <span class="text-xs font-bold uppercase tracking-widest">Discord</span>
+                        <span class="text-[10px] font-bold uppercase tracking-widest">Discord</span>
                     </a>
                 </div>
             </div>
 
             <div class="space-y-6">
                 <div class="glass rounded-3xl p-6">
-                    <h4 class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4">Live Netzwerk Status</h4>
+                    <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Live Netzwerk</h4>
                     <div class="space-y-4">
                         <div class="flex justify-between items-center">
                             <span class="text-sm">Java Edition</span>
-                            <span class="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded">25565 ONLINE</span>
+                            <span id="java-status" class="text-[10px] bg-gray-700 text-gray-300 px-2 py-1 rounded font-bold">LÄDT...</span>
                         </div>
                         <div class="flex justify-between items-center">
-                            <span class="text-sm">Bedrock Support</span>
-                            <span class="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded">30490 ONLINE</span>
+                            <span class="text-sm">Bedrock Port</span>
+                            <span class="text-[10px] text-gray-500 font-bold">30490</span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-sm">VoiceChat</span>
-                            <span class="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded">30489 AKTIV</span>
+                            <span class="text-[10px] bg-blue-500/20 text-blue-400 px-2 py-1 rounded font-bold">30489</span>
                         </div>
-                        <div class="flex justify-between items-center border-t border-white/5 pt-4 mt-4">
-                            <span class="text-sm font-bold">Datenbank (Plan)</span>
-                            <span class="text-xs text-gray-500">PORT 3306</span>
+                        <div class="pt-4 border-t border-white/5">
+                            <div class="flex justify-between items-baseline">
+                                <span class="text-xs text-gray-400">Spieler online:</span>
+                                <span id="player-count" class="text-xl font-black text-blue-400">0</span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="glass rounded-3xl p-6 accent-gradient border-none">
-                    <h4 class="font-bold mb-1">Hilfe benötigt?</h4>
-                    <p class="text-xs text-blue-100 mb-4">Unser Team hilft dir gerne bei Fragen weiter.</p>
-                    <a href="mailto:support@craftcraftmine.net" class="block w-full bg-white text-blue-600 text-center py-2 rounded-xl font-bold text-sm">Support schreiben</a>
+                <div class="glass rounded-3xl p-6 accent-gradient border-none text-white">
+                    <h4 class="font-bold mb-2">Kontakt & Support</h4>
+                    <div class="text-[11px] space-y-2 mb-4 opacity-90">
+                        <p>General: <a href="mailto:support@craftcraftmine.net" class="underline">support@craftcraftmine.net</a></p>
+                        <p>Messe: <a href="mailto:messe@craftcraftmine.net" class="underline">messe@craftcraftmine.net</a></p>
+                    </div>
+                    <a href="mailto:support@craftcraftmine.net" class="block w-full bg-white text-blue-600 text-center py-2 rounded-xl font-bold text-sm shadow-lg">E-Mail schreiben</a>
                 </div>
             </div>
         </div>
 
-        <footer class="mt-20 text-center text-gray-500 text-xs">
-            <p>&copy; 2026 CraftCraftMine Netzwerk | <a href="mailto:messe@craftcraftmine.net" class="hover:text-white">Messe-Kontakt</a></p>
+        <footer class="mt-20 text-center text-gray-600 text-[10px] tracking-widest uppercase">
+            <p>© 2026 CraftCraftMine Netzwerk</p>
         </footer>
     </div>
 
     <script>
+        // SLIDER LOGIK
         let currentSlide = 0;
         const slider = document.getElementById('slider');
         function moveSlide(direction) {
@@ -117,7 +126,32 @@
             currentSlide = (currentSlide + direction + slides.length) % slides.length;
             slider.style.transform = `translateX(-${currentSlide * 100}%)`;
         }
-        setInterval(() => moveSlide(1), 7000);
+        setInterval(() => moveSlide(1), 8000);
+
+        // LIVE SERVER DATA (Echte Daten abfragen)
+        async function fetchServerStatus() {
+            try {
+                const response = await fetch('https://api.mcstatus.io/v2/status/java/craftcraftmine.net');
+                const data = await response.json();
+                
+                const statusLabel = document.getElementById('java-status');
+                const playerLabel = document.getElementById('player-count');
+
+                if (data.online) {
+                    statusLabel.innerText = "ONLINE";
+                    statusLabel.className = "text-[10px] bg-green-500/20 text-green-400 px-2 py-1 rounded font-bold";
+                    playerLabel.innerText = data.players.online;
+                } else {
+                    statusLabel.innerText = "OFFLINE";
+                    statusLabel.className = "text-[10px] bg-red-500/20 text-red-400 px-2 py-1 rounded font-bold";
+                    playerLabel.innerText = "0";
+                }
+            } catch (e) {
+                console.log("Status konnte nicht geladen werden.");
+            }
+        }
+        fetchServerStatus();
+        setInterval(fetchServerStatus, 30000); // Alle 30 Sek. aktualisieren
     </script>
 </body>
 </html>
