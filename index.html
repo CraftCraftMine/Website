@@ -5,82 +5,119 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CraftCraftMine | Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.cdnfonts.com/css/minecraft-ia" rel="stylesheet">
     <style>
-        body { 
-            background-color: #1a1a1a; 
-            color: white; 
-            font-family: 'Minecraftia', sans-serif;
-            background-image: url('https://www.transparenttextures.com/patterns/dark-matter.png'); /* Dezente Textur */
-        }
-        .mc-button {
-            background: #555;
-            border: 4px solid #000;
-            box-shadow: inset -4px -4px #222, inset 4px 4px #aaa;
-            image-rendering: pixelated;
-        }
-        .mc-button:hover { background: #3c8527; box-shadow: inset -4px -4px #1a3911, inset 4px 4px #78e053; }
-        
-        /* Slider Styling */
-        .slider-container { display: flex; transition: transform 0.5s ease-in-out; }
-        .slide { min-width: 100%; display: flex; align-items: center; gap: 20px; padding: 20px; }
+        body { background-color: #0f172a; color: #f1f5f9; font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        .accent-gradient { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
     </style>
 </head>
-<body class="p-4 sm:p-10">
+<body class="min-h-screen">
 
-    <header class="flex justify-end mb-10">
-        <img src="https://raw.githubusercontent.com/CraftCraftMine/Bilder/main/Bred.png" alt="Logo" class="w-24 h-24 border-4 border-black shadow-lg">   /* Logo */
-    </header>
+    <div class="accent-gradient py-2 text-center text-sm font-bold shadow-md">
+        <span>📢 NEWS: Wartungsarbeiten am Freitag | Neues Wirtschaftssystem online!</span>
+    </div>
 
-    <main class="max-w-4xl mx-auto">
+    <div class="max-w-6xl mx-auto px-6 py-10">
         
-        <div class="relative bg-gray-800 border-4 border-black p-2 mb-10 overflow-hidden shadow-2xl">
-            <div id="slider" class="slider-container">
-                
-                <div class="slide bg-gray-700">
-                    <img src="https://raw.githubusercontent.com/CraftCraftMine/Bilder/main/Bred.png" class="w-1/3 border-2 border-black" alt="News 1"> /* Bild */
-                    <div>
-                        <h2 class="text-xl text-green-400">SERVER-MESSE 2026</h2>
-                        <p class="text-sm">Besuche unsere große Messe! Alle Infos findest du im GitBook.</p>
-                    </div>
-                </div>
-
-                <div class="slide bg-gray-700">
-                    <img src="https://via.placeholder.com/150" class="w-1/3 border-2 border-black" alt="News 2">
-                    <div>
-                        <h2 class="text-xl text-yellow-400">NEUES PLUGIN</h2>
-                        <p class="text-sm">Wir haben jetzt ein neues Wirtschaftssystem. Schau es dir an!</p>
-                    </div>
-                </div>
-
+        <header class="flex justify-between items-center mb-12">
+            <div>
+                <h1 class="text-3xl font-extrabold tracking-tight">CRAFTCRAFT<span class="text-blue-500">MINE</span></h1>
+                <p class="text-gray-400">Dein Premium Minecraft Netzwerk</p>
             </div>
-            <button onclick="moveSlide(-1)" class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 p-2">◀</button>
-            <button onclick="moveSlide(1)" class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 p-2">▶</button>
+            <img src="HIER_DEIN_LOGO_RAW_LINK" alt="Logo" class="w-20 h-20 rounded-2xl shadow-2xl border-2 border-blue-500/30">
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <div class="lg:col-span-2 space-y-6">
+                <div class="glass rounded-3xl p-2 relative overflow-hidden group">
+                    <div id="slider" class="flex transition-transform duration-500 ease-in-out">
+                        <div class="min-w-full p-6 flex flex-col md:flex-row gap-6 items-center">
+                            <img src="https://via.placeholder.com/300x200/1e293b/ffffff?text=Messe+2026" class="rounded-xl w-full md:w-1/2 object-cover h-48">
+                            <div>
+                                <span class="bg-blue-500/20 text-blue-400 text-xs px-2 py-1 rounded uppercase font-bold">Event</span>
+                                <h3 class="text-2xl font-bold mt-2">Server-Messe 2026</h3>
+                                <p class="text-gray-400 mt-2 text-sm leading-relaxed">Erkunde die riesige Messehalle und entdecke neue Projekte unserer Spieler.</p>
+                            </div>
+                        </div>
+                        <div class="min-w-full p-6 flex flex-col md:flex-row gap-6 items-center">
+                            <img src="https://via.placeholder.com/300x200/1e293b/ffffff?text=Bedrock+Support" class="rounded-xl w-full md:w-1/2 object-cover h-48">
+                            <div>
+                                <span class="bg-green-500/20 text-green-400 text-xs px-2 py-1 rounded uppercase font-bold">Update</span>
+                                <h3 class="text-2xl font-bold mt-2">Jetzt auch für Bedrock</h3>
+                                <p class="text-gray-400 mt-2 text-sm leading-relaxed">Dank Geyser-Support könnt ihr jetzt auch mit Handy und Konsole beitreten!</p>
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="moveSlide(-1)" class="absolute left-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 p-2 rounded-full transition">◀</button>
+                    <button onclick="moveSlide(1)" class="absolute right-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 p-2 rounded-full transition">▶</button>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <a href="http://map.craftcraftmine.net:30486" class="glass p-4 rounded-2xl text-center hover:bg-blue-600/20 transition">
+                        <div class="text-2xl mb-1">🗺️</div>
+                        <span class="text-xs font-bold uppercase tracking-widest">Karte</span>
+                    </a>
+                    <a href="https://status.craftcraftmine.net" class="glass p-4 rounded-2xl text-center hover:bg-green-600/20 transition">
+                        <div class="text-2xl mb-1">📈</div>
+                        <span class="text-xs font-bold uppercase tracking-widest">Status</span>
+                    </a>
+                    <a href="https://DEIN-GITBOOK" class="glass p-4 rounded-2xl text-center hover:bg-purple-600/20 transition">
+                        <div class="text-2xl mb-1">📖</div>
+                        <span class="text-xs font-bold uppercase tracking-widest">Wiki</span>
+                    </a>
+                    <a href="https://discord.gg/DEIN-LINK" class="glass p-4 rounded-2xl text-center hover:bg-indigo-600/20 transition">
+                        <div class="text-2xl mb-1">💬</div>
+                        <span class="text-xs font-bold uppercase tracking-widest">Discord</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="glass rounded-3xl p-6">
+                    <h4 class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4">Live Netzwerk Status</h4>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm">Java Edition</span>
+                            <span class="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded">25565 ONLINE</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm">Bedrock Support</span>
+                            <span class="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded">30490 ONLINE</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm">VoiceChat</span>
+                            <span class="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded">30489 AKTIV</span>
+                        </div>
+                        <div class="flex justify-between items-center border-t border-white/5 pt-4 mt-4">
+                            <span class="text-sm font-bold">Datenbank (Plan)</span>
+                            <span class="text-xs text-gray-500">PORT 3306</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass rounded-3xl p-6 accent-gradient border-none">
+                    <h4 class="font-bold mb-1">Hilfe benötigt?</h4>
+                    <p class="text-xs text-blue-100 mb-4">Unser Team hilft dir gerne bei Fragen weiter.</p>
+                    <a href="mailto:support@craftcraftmine.net" class="block w-full bg-white text-blue-600 text-center py-2 rounded-xl font-bold text-sm">Support schreiben</a>
+                </div>
+            </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10 text-center">
-            <a href="http://map.craftcraftmine.net" class="mc-button p-6 text-xl">LIVE-KARTE</a>
-            <a href="https://DEIN-GITBOOK" class="mc-button p-6 text-xl">WIKI (GitBook)</a>
-            <a href="https://discord.gg/DEIN-LINK" class="mc-button p-6 text-xl">DISCORD</a>
-            <a href="https://status.craftcraftmine.net" class="mc-button p-6 text-xl text-green-300">SERVER-STATUS</a>
-        </div>
-
-        <footer class="text-center text-gray-400 border-t-2 border-gray-700 pt-6">
-            <p>Support: <a href="mailto:support@craftcraftmine.net" class="text-blue-400">support@craftcraftmine.net</a></p>
-            <p>Messe: <a href="mailto:messe@craftcraftmine.net" class="text-blue-400">messe@craftcraftmine.net</a></p>
+        <footer class="mt-20 text-center text-gray-500 text-xs">
+            <p>&copy; 2026 CraftCraftMine Netzwerk | <a href="mailto:messe@craftcraftmine.net" class="hover:text-white">Messe-Kontakt</a></p>
         </footer>
-    </main>
+    </div>
 
     <script>
         let currentSlide = 0;
         const slider = document.getElementById('slider');
         function moveSlide(direction) {
-            const slides = document.querySelectorAll('.slide');
+            const slides = document.querySelectorAll('.min-w-full');
             currentSlide = (currentSlide + direction + slides.length) % slides.length;
             slider.style.transform = `translateX(-${currentSlide * 100}%)`;
         }
-        // Automatisches Wischen alle 5 Sekunden
-        setInterval(() => moveSlide(1), 5000);
+        setInterval(() => moveSlide(1), 7000);
     </script>
 </body>
 </html>
