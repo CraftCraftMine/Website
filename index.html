@@ -5,17 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CraftCraftMine | Home</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="config.js"></script>
     <style>
-        body { background-color: #0f172a; color: #f1f5f9; font-family: 'Inter', sans-serif; }
+        body { background-color: #0f172a; color: #f1f5f9; font-family: 'Inter', sans-serif; overflow-x: hidden; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
-        .accent-gradient { background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); } /* Jetzt in Rot passend zum Logo */
+        .accent-gradient { background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); }
         .slider-container { overflow: hidden; width: 100%; position: relative; }
+        #cookie-banner { transition: transform 0.5s ease-in-out; }
     </style>
 </head>
 <body class="min-h-screen">
 
     <div class="accent-gradient py-2 text-center text-sm font-bold shadow-md">
-        <span id="news-ticker">📢 Jetzt neu! Die Nachhaltigkeitsmesse!</span>
+        <span id="news-ticker-el"></span>
     </div>
 
     <div class="max-w-6xl mx-auto px-6 py-10">
@@ -24,54 +26,17 @@
                 <h1 class="text-3xl font-extrabold tracking-tight uppercase">CraftCraftMine</h1>
                 <p class="text-red-500 font-medium text-sm tracking-widest">Netzwerk</p>
             </div>
-            <div class="w-20 h-20 rounded-2xl border border-white/5 opacity-0"></div>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2 space-y-6">
-                
-                <div class="glass rounded-3xl relative group">
+                <div class="glass rounded-3xl relative group min-h-[300px] flex items-center">
                     <div class="slider-container rounded-3xl">
                         <div id="slider" class="flex transition-transform duration-500 ease-in-out">
-                            
-                            <div class="min-w-full p-8 flex flex-col md:flex-row gap-8 items-center">
-                                <img src="https://github.com/CraftCraftMine/Bilder2/blob/main/Bildschirmfoto_20260127_161626.png?raw=true" class="rounded-xl w-full md:w-1/2 aspect-video object-cover shadow-lg">
-                                <div class="flex-1">
-                                    <h3 class="text-2xl font-bold">Nachhaltigkeits-Messe 2026</h3>
-                                    <p class="text-gray-400 mt-2 text-sm mb-4">Besuche unsere Stände und informiere dich über die 17 Ziele der Nachhaltigkeit!</p>
-                                    <a href="#" class="inline-block bg-red-600 hover:bg-red-500 px-4 py-2 rounded-lg text-sm font-bold transition">Mehr erfahren</a>
-                                </div>
                             </div>
-
-                            <div class="min-w-full p-8 flex flex-col md:flex-row gap-8 items-center">
-                                <img src="https://raw.githubusercontent.com/CraftCraftMine/Bilder2/main/Bildschirmfoto_20260127_161952.png" class="rounded-xl w-full md:w-1/2 aspect-video object-cover shadow-lg">
-                                <div class="flex-1">
-                                    <h3 class="text-2xl font-bold">Bedrock Support</h3>
-                                    <p class="text-gray-400 mt-2 text-sm mb-4">Wir haben nach langem Überlegen wieder die Bedrock Unterstützung aktiviert!</p>
-                                    <a href="#" class="inline-block bg-red-600 hover:bg-red-500 px-4 py-2 rounded-lg text-sm font-bold transition">Mehr Infos</a>
-                                </div>
-                            </div>
-
-                            <div class="min-w-full p-8 flex flex-col md:flex-row gap-8 items-center">
-                                <img src="https://raw.githubusercontent.com/CraftCraftMine/Bilder2/main/Bildschirmfoto_20260127_161818.png" class="rounded-xl w-full md:w-1/2 aspect-video object-cover shadow-lg">
-                                <div class="flex-1">
-                                    <h3 class="text-2xl font-bold">Status Website</h3>
-                                    <p class="text-gray-400 mt-2 text-sm mb-4">Überprüfe jederzeit die Erreichbarkeit unserer Server auf unserer neuen Status-Seite!</p>
-                                    <a href="https://status.craftcraftmine.net" class="inline-block bg-red-600 hover:bg-red-500 px-4 py-2 rounded-lg text-sm font-bold transition">Besuchen</a>
-                                </div>
-                            </div>
-
-                            <div class="min-w-full p-8 flex flex-col items-center justify-center text-center min-h-[250px]">
-                                <h3 class="text-3xl font-black text-red-500 uppercase italic">Neue Server-IP!</h3>
-                                <p class="text-xl font-bold mt-4 tracking-widest bg-white/5 px-6 py-3 rounded-2xl border border-red-500/20">craftcraftmine.net</p>
-                                <p class="text-gray-400 mt-4 text-sm max-w-md">Die alte IP ist ab sofort nicht mehr verfügbar. Aktualisiere deine Serverliste!</p>
-                            </div>
-
-                        </div>
                     </div>
-                    
-                    <button onclick="moveSlide(-1)" class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-red-600 p-3 rounded-full transition-all z-10">◀</button>
-                    <button onclick="moveSlide(1)" class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-red-600 p-3 rounded-full transition-all z-10">▶</button>
+                    <button onclick="manualMove(-1)" class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-red-600 p-3 rounded-full z-10">◀</button>
+                    <button onclick="manualMove(1)" class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-red-600 p-3 rounded-full z-10">▶</button>
                 </div>
 
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -122,33 +87,68 @@
         </footer>
     </div>
 
+    <div id="cookie-banner" class="fixed bottom-6 right-6 left-6 md:left-auto md:w-96 glass p-6 rounded-3xl shadow-2xl z-50 border-t-2 border-red-500">
+        <p id="cookie-msg" class="text-xs text-gray-300 leading-relaxed mb-4"></p>
+        <button onclick="dismissCookie()" id="cookie-btn" class="w-full py-2 bg-red-600 hover:bg-red-500 rounded-xl text-xs font-black uppercase tracking-widest transition"></button>
+    </div>
+
     <script>
-        let currentSlide = 0;
+        // Daten aus CONFIG laden
+        document.getElementById('news-ticker-el').innerText = CONFIG.newsTicker;
+        document.getElementById('cookie-msg').innerText = CONFIG.cookieText;
+        document.getElementById('cookie-btn').innerText = CONFIG.cookieButton;
+
+        // Slider generieren
         const slider = document.getElementById('slider');
-        const slides = slider.children;
-        const totalSlides = slides.length;
+        CONFIG.slides.forEach(slide => {
+            const div = document.createElement('div');
+            div.className = "min-w-full p-8 flex flex-col md:flex-row gap-8 items-center";
+            
+            // Falls kein Bild da ist (z.B. IP Slide), zentrieren wir alles
+            const contentClass = slide.image ? "flex-1" : "flex-1 text-center";
+            const imgHtml = slide.image ? `<img src="${slide.image}" class="rounded-xl w-full md:w-1/2 aspect-video object-cover shadow-lg">` : "";
+
+            div.innerHTML = `
+                ${imgHtml}
+                <div class="${contentClass}">
+                    <h3 class="${slide.image ? 'text-2xl' : 'text-3xl'} font-bold">${slide.title}</h3>
+                    <p class="text-gray-400 mt-2 text-sm mb-4">${slide.description}</p>
+                    <a href="${slide.buttonLink}" class="inline-block bg-red-600 hover:bg-red-500 px-4 py-2 rounded-lg text-sm font-bold transition">${slide.buttonText}</a>
+                </div>
+            `;
+            slider.appendChild(div);
+        });
+
+        // Slider Logik
+        let currentSlide = 0;
+        const totalSlides = CONFIG.slides.length;
 
         function moveSlide(direction) {
             currentSlide = (currentSlide + direction + totalSlides) % totalSlides;
             slider.style.transform = `translateX(-${currentSlide * 100}%)`;
         }
 
-        // Automatischer Wechsel alle 10 Sekunden
         let autoSlide = setInterval(() => moveSlide(1), 10000);
 
-        // Reset Timer bei manuellem Klick
         function manualMove(dir) {
             clearInterval(autoSlide);
             moveSlide(dir);
             autoSlide = setInterval(() => moveSlide(1), 10000);
         }
 
+        // Cookie Banner Funktion
+        function dismissCookie() {
+            const banner = document.getElementById('cookie-banner');
+            banner.style.transform = 'translateY(200%)';
+            setTimeout(() => banner.remove(), 600);
+        }
+
+        // Minecraft Status
         async function fetchMainStatus() {
             try {
                 const res = await fetch('https://api.mcstatus.io/v2/status/java/craftcraftmine.net');
                 const data = await res.json();
                 const statusEl = document.getElementById('java-status');
-                
                 if (data.online) {
                     statusEl.innerText = "ONLINE";
                     statusEl.className = "text-[10px] font-bold px-3 py-1 rounded-full bg-green-500/20 text-green-400 border border-green-500/30";
@@ -156,11 +156,8 @@
                 } else {
                     statusEl.innerText = "OFFLINE";
                     statusEl.className = "text-[10px] font-bold px-3 py-1 rounded-full bg-red-500/20 text-red-400 border border-red-500/30";
-                    document.getElementById('player-count').innerText = "0";
                 }
-            } catch (e) {
-                console.log("Status konnte nicht geladen werden.");
-            }
+            } catch (e) { console.log("Status Error"); }
         }
 
         fetchMainStatus();
