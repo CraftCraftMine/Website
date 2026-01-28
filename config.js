@@ -37,6 +37,6 @@ const CONFIG = {
     ],
 
     // Cookie Banner Text
-    cookieText: "Diese Website nutzt keine Cookies, dieses Banner ist nur für die Cookie-Fans.",
+    cookieText: " Diese Seite verwendet keine Cookies. Der Banner ist nur da um den Cookielovern einen Button zum Klicken zu geben. ",
     cookieButton: "Ja, geh weg"
 };
