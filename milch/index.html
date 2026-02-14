@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Die Reise der Milch | Projekt</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Open+Sans:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent-blue: #0077b6;
+            --milk-white: #ffffff;
+            --bg-soft: #f8fbfd;
+            --text-dark: #2c3e50;
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: var(--bg-soft);
+            color: var(--text-dark);
+            margin: 0;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        h1, h2 { font-family: 'Montserrat', sans-serif; font-weight: 700; }
+
+        /* Individueller Cursor-Effekt */
+        #cursor-glow {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(0,119,182,0.08) 0%, rgba(255,255,255,0) 70%);
+            position: fixed;
+            pointer-events: none;
+            z-index: 0;
+            transform: translate(-50%, -50%);
+        }
+
+        /* Hero-Bereich */
+        .hero {
+            height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background: linear-gradient(135deg, #e0f2f1 0%, #ffffff 100%);
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-content h1 {
+            font-size: clamp(2rem, 8vw, 4rem);
+            color: var(--accent-blue);
+            margin: 0;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 1s forwards;
+        }
+
+        /* Die Sektionen */
+        .content-section {
+            max-width: 1100px;
+            margin: 100px auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            margin-bottom: 150px;
+            gap: 50px;
+            perspective: 1000px; /* Wichtig für 3D-Effekt */
+        }
+
+        .step:nth-child(even) { flex-direction: row-reverse; }
+
+        .image-container {
+            flex: 1;
+            transition: transform 0.3s ease-out;
+            transform-style: preserve-3d;
+        }
+
+        /* Der "Ankipp-Effekt" beim Hover */
+        .image-container:hover {
+            transform: rotateY(10deg) rotateX(5deg) scale(1.02);
+        }
+
+        .image-container img {
+            width: 100%;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            display: block;
+        }
+
+        .text-container {
+            flex: 1;
+            opacity: 0;
+            transform: translateX(-50px);
+            transition: all 0.8s ease-out;
+        }
+
+        .step:nth-child(even) .text-container { transform: translateX(50px); }
+
+        /* Wenn gescrollt wird, Klasse hinzufügen */
+        .is-visible .text-container {
+            opacity: 1;
+            transform: translateX(0) !important;
+        }
+
+        .step-number {
+            font-size: 5rem;
+            color: rgba(0, 119, 182, 0.1);
+            position: absolute;
+            top: -50px;
+            left: -20px;
+            z-index: -1;
+        }
+
+        /* Animationen */
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .step, .step:nth-child(even) { flex-direction: column; text-align: center; }
+            .step-number { left: 50%; transform: translateX(-50%); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="cursor-glow"></div>
+
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Vom Kuhstall ins Kühlregal</h1>
+            <p>Ein interaktiver Wegweiser durch die Milchproduktion</p>
+        </div>
+    </section>
+
+    <div class="content-section">
+        
+        <div class="step">
+            <div class="image-container">
+                <span class="step-number">01</span>
+                <img src="https://images.unsplash.com/photo-1570042225831-d98fa7577f1e?auto=format&fit=crop&w=600" alt="Kuhstall">
+            </div>
+            <div class="text-container">
+                <h2>Haltung & Pflege</h2>
+                <p>Moderne Landwirtschaft beginnt bei der Gesundheit der Tiere. Hier erfährst du, wie Kühe heute leben und was sie für gute Milch brauchen.</p>
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="image-container">
+                <span class="step-number">02</span>
+                <img src="https://images.unsplash.com/photo-1527153369174-43d9224d776a?auto=format&fit=crop&w=600" alt="Melken">
+            </div>
+            <div class="text-container">
+                <h2>Die Gewinnung</h2>
+                <p>Präzision und Hygiene: Der Melkvorgang ist hochautomatisiert, um die Qualität der Rohmilch ab der ersten Sekunde zu sichern.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // 1. Cursor Follower Effekt
+        const glow = document.getElementById('cursor-glow');
+        document.addEventListener('mousemove', (e) => {
+            glow.style.left = e.clientX + 'px';
+            glow.style.top = e.clientY + 'px';
+        });
+
+        // 2. Scroll-Animation (Einfliegen der Texte)
+        const observerOptions = { threshold: 0.3 };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.step').forEach(step => observer.observe(step));
+    </script>
+</body>
+</html>
