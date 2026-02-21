@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>TSW EBuLa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@300;400;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+:root {
+  --bg:       #0a0e1a;
+  --surface:  #111827;
+  --surface2: #1a2235;
+  --border:   #1e2d45;
+  --primary:  #38bdf8;
+  --accent:   #f59e0b;
+  --green:    #4ade80;
+  --red:      #f87171;
+  --text:     #e2e8f0;
+  --muted:    #64748b;
+  --mono:     'Share Tech Mono', monospace;
+  --sans:     'Barlow', sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body, #root { height: 100%; }
+body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 15px; overflow: hidden; }
+
+/* Layout */
+.app { display: flex; flex-direction: column; height: 100dvh; }
+.topbar { display: flex; align-items: center; gap: 12px; padding: 10px 16px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.topbar-title { font-family: var(--mono); font-size: 18px; color: var(--primary); letter-spacing: 2px; flex: 1; }
+.topbar-sub { font-size: 11px; color: var(--muted); }
+.content { flex: 1; overflow: hidden; position: relative; }
+.screen { position: absolute; inset: 0; overflow-y: auto; padding: 16px; }
+
+/* Buttons */
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-family: var(--sans); font-size: 14px; font-weight: 600; transition: all .15s; }
+.btn-primary { background: var(--primary); color: #0a0e1a; }
+.btn-primary:hover { background: #7dd3fc; }
+.btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+.btn-ghost:hover { background: var(--surface2); }
+.btn-danger { background: transparent; color: var(--red); border: 1px solid var(--red)33; }
+.btn-danger:hover { background: var(--red)22; }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+.btn-icon { padding: 7px; border-radius: 6px; background: transparent; border: 1px solid var(--border); cursor: pointer; color: var(--muted); transition: all .15s; }
+.btn-icon:hover { color: var(--text); background: var(--surface2); }
+
+/* Cards */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 12px; }
+.card-title { font-weight: 700; font-size: 16px; margin-bottom: 4px; }
+.card-sub { font-size: 12px; color: var(--muted); }
+
+/* Inputs */
+.field { margin-bottom: 12px; }
+.field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .5px; }
+.input { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 9px 12px; color: var(--text); font-family: var(--sans); font-size: 14px; outline: none; transition: border .15s; }
+.input:focus { border-color: var(--primary); }
+.input-row { display: flex; gap: 8px; }
+.input-row .field { flex: 1; }
+select.input { cursor: pointer; }
+
+/* Badge */
+.badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 700; font-family: var(--mono); }
+
+/* Modal */
+.overlay { position: fixed; inset: 0; background: #00000099; z-index: 100; display: flex; align-items: flex-end; justify-content: center; }
+.modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px 16px 0 0; width: 100%; max-width: 600px; padding: 20px; max-height: 90dvh; overflow-y: auto; }
+.modal-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+
+/* Home */
+.route-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; }
+.route-card-header { display: flex; align-items: center; gap: 10px; }
+.route-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+.fab { position: fixed; bottom: 24px; right: 20px; width: 52px; height: 52px; border-radius: 50%; background: var(--primary); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #0a0e1a; box-shadow: 0 4px 24px #38bdf855; z-index: 50; }
+
+/* Editor */
+.km-strip { display: flex; align-items: center; gap: 0; border-left: 3px solid var(--primary); padding-left: 12px; margin-bottom: 8px; }
+.km-label { font-family: var(--mono); font-size: 11px; color: var(--primary); min-width: 52px; }
+.obj-type-badge { padding: 3px 8px; border-radius: 4px; font-family: var(--mono); font-size: 11px; font-weight: 700; margin-right: 8px; }
+.obj-name { font-size: 14px; flex: 1; }
+.obj-sub { font-size: 11px; color: var(--muted); }
+
+/* EBuLa Drive View */
+.drive-layout { display: flex; flex-direction: column; height: 100dvh; background: #05080f; }
+.drive-hud { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; background: #0a0e1a; border-bottom: 1px solid #0f1e2e; flex-shrink: 0; }
+.hud-item { text-align: center; }
+.hud-label { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+.hud-value { font-family: var(--mono); font-size: 22px; color: var(--primary); }
+.hud-value.green { color: var(--green); }
+.hud-next { text-align: center; flex: 1; }
+.hud-next-name { font-size: 13px; font-weight: 700; color: var(--text); }
+.hud-next-time { font-family: var(--mono); font-size: 11px; color: var(--accent); }
+
+.ebula-container { display: flex; flex: 1; overflow: hidden; }
+.km-scale { width: 50px; background: #07090f; border-right: 1px solid #0f1e2e; overflow: hidden; flex-shrink: 0; }
+.ebula-list { flex: 1; overflow-y: auto; }
+.ebula-row { display: flex; align-items: center; min-height: 44px; border-bottom: 1px solid #0a0f1a; padding: 0 8px 0 0; transition: background .2s; }
+.ebula-row.passed { opacity: .4; }
+.ebula-row.current { background: #0d2a0d !important; }
+.ebula-row.station { min-height: 54px; background: #0a1628; }
+.ebula-line { width: 3px; min-height: 44px; background: #1e3a5f; margin: 0 10px; flex-shrink: 0; position: relative; }
+.ebula-row.passed .ebula-line { background: #1a2235; }
+.ebula-row.current .ebula-line { background: var(--green); }
+.ebula-row.station .ebula-line { background: var(--primary); }
+.ebula-sym { width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 10px; font-weight: 700; flex-shrink: 0; margin-right: 8px; }
+.ebula-sym.station-sym { width: 40px; height: 40px; border-radius: 6px; font-size: 11px; }
+.ebula-text { flex: 1; }
+.ebula-name { font-size: 14px; font-weight: 600; }
+.ebula-row.station .ebula-name { font-size: 15px; }
+.ebula-detail { font-size: 11px; color: var(--muted); font-family: var(--mono); }
+.pos-arrow { color: var(--green); font-size: 14px; margin-left: 4px; animation: blink 1s infinite; }
+@keyframes blink { 50% { opacity: .3; } }
+.km-row { height: 44px; display: flex; align-items: center; justify-content: center; }
+.km-row.station-km { height: 54px; }
+.km-text { font-family: var(--mono); font-size: 9px; color: #1e3a5f; }
+.km-text.active { color: var(--primary); }
+
+.drive-controls { display: flex; align-items: center; justify-content: space-around; padding: 10px 16px; background: #0a0e1a; border-top: 1px solid #0f1e2e; flex-shrink: 0; gap: 8px; }
+.time-input-big { background: transparent; border: 1px solid var(--border); border-radius: 6px; color: var(--primary); font-family: var(--mono); font-size: 20px; text-align: center; width: 90px; padding: 6px; outline: none; }
+.offset-btn { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; color: var(--text); font-family: var(--mono); font-size: 12px; padding: 5px 8px; cursor: pointer; }
+
+/* Progress bar */
+.progress-bar { height: 3px; background: var(--border); flex-shrink: 0; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--green)); transition: width .5s; }
+
+/* Tabs */
+.tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+.tab { padding: 10px 16px; font-size: 14px; font-weight: 600; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all .15s; }
+.tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+/* Empty state */
+.empty { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; color: var(--muted); gap: 12px; text-align: center; }
+.empty-icon { font-size: 48px; opacity: .3; }
+
+/* Checkbox */
+.check-row { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; }
+.check-row input { width: 16px; height: 16px; accent-color: var(--primary); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+
+// ─── Konstanten ─────────────────────────────────────────────────────────────
+const OBJ_TYPES = {
+  STATION:      { label: 'Bahnhof / Halt',       short: 'Bf',  color: '#1d4ed8', bg: '#1e3a8a33' },
+  SPEED_CHANGE: { label: 'Geschwindigkeitswechsel', short: 'V', color: '#d97706', bg: '#92400e33' },
+  BUE:          { label: 'Bahnübergang',          short: 'BÜ', color: '#dc2626', bg: '#7f1d1d33' },
+  SIGNAL:       { label: 'Signal',                short: 'Sig', color: '#7c3aed', bg: '#4c1d9533' },
+  TUNNEL_START: { label: 'Tunnelanfang',          short: 'Tu▶', color: '#475569', bg: '#1e293b33' },
+  TUNNEL_END:   { label: 'Tunnelende',            short: '◀Tu', color: '#475569', bg: '#1e293b33' },
+  GRADIENT:     { label: 'Steigung / Gefälle',   short: '‰',  color: '#059669', bg: '#064e3b33' },
+  SLOW_SPEED:   { label: 'Langsamfahrstelle',     short: 'La', color: '#ea580c', bg: '#7c2d1233' },
+};
+
+// ─── Speicher ────────────────────────────────────────────────────────────────
+const DB = {
+  load: (key) => { try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch { return null; } },
+  save: (key, val) => localStorage.setItem(key, JSON.stringify(val)),
+  routes: () => DB.load('ebula_routes') || [],
+  saveRoutes: (r) => DB.save('ebula_routes', r),
+};
+
+// ─── Positionsrechner ─────────────────────────────────────────────────────────
+function calcKm(timeStr, trip, timetable) {
+  if (!timeStr || !trip) return 0;
+  const toSec = t => { if (!t) return null; const [h,m] = t.split(':').map(Number); return h*3600 + m*60; };
+  const diff = (a, b) => { let d = toSec(b) - toSec(a); if (d < 0) d += 86400; return d; };
+
+  if (trip.mode === 'SPEED') {
+    const elapsed = diff(trip.departure, timeStr) / 3600;
+    return elapsed * trip.avgSpeed + (trip.offset || 0);
+  }
+
+  const anchors = timetable
+    .map(e => ({ km: e.km, sec: toSec(e.departure || e.arrival) }))
+    .filter(a => a.sec !== null)
+    .sort((a,b) => a.km - b.km);
+
+  if (!anchors.length) return 0;
+  const cur = toSec(timeStr);
+  if (cur <= anchors[0].sec) return anchors[0].km + (trip.offset || 0);
+  if (cur >= anchors[anchors.length-1].sec) return anchors[anchors.length-1].km + (trip.offset || 0);
+
+  for (let i = 0; i < anchors.length - 1; i++) {
+    const a = anchors[i], b = anchors[i+1];
+    let ca = a.sec, cb = b.sec;
+    let cc = cur;
+    if (cb < ca) cb += 86400;
+    if (cc < ca) cc += 86400;
+    if (cc >= ca && cc <= cb) {
+      const p = (cc - ca) / (cb - ca);
+      return a.km + (b.km - a.km) * p + (trip.offset || 0);
+    }
+  }
+  return anchors[anchors.length-1].km + (trip.offset || 0);
+}
+
+function advanceSec(t, s) {
+  if (!t) return t;
+  const [h, m] = t.split(':').map(Number);
+  const total = (h*3600 + m*60 + s) % 86400;
+  return `${String(Math.floor(total/3600)).padStart(2,'0')}:${String(Math.floor((total%3600)/60)).padStart(2,'0')}`;
+}
+
+// ─── UI Komponenten ───────────────────────────────────────────────────────────
+function Icon({ name }) {
+  const icons = {
+    plus: '＋', back: '←', trash: '🗑', edit: '✏️', train: '🚆',
+    cloud: '☁️', phone: '📱', play: '▶', stop: '⏹', lock: '🔒',
+    unlock: '🔓', tune: '⚙️', time: '🕐', export: '📤', import: '📥',
+    route: '🛤️', timetable: '🗓️', drive: '🚂', check: '✓',
+  };
+  return <span>{icons[name] || '•'}</span>;
+}
+
+function Modal({ title, onClose, children, actions }) {
+  return (
+    <div className="overlay" onClick={e => e.target===e.currentTarget && onClose()}>
+      <div className="modal">
+        <div className="modal-title">{title}</div>
+        {children}
+        <div className="modal-actions">
+          <button className="btn btn-ghost" onClick={onClose}>Abbrechen</button>
+          {actions}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Field({ label, children }) {
+  return <div className="field"><label>{label}</label>{children}</div>;
+}
+
+// ─── HOME SCREEN ──────────────────────────────────────────────────────────────
+function HomeScreen({ onNavigate }) {
+  const [routes, setRoutes] = useState(DB.routes());
+  const [showCreate, setShowCreate] = useState(false);
+  const [showImport, setShowImport] = useState(false);
+  const [form, setForm] = useState({ name:'', desc:'', startKm:'0', endKm:'100' });
+  const [importUrl, setImportUrl] = useState('');
+  const [importStatus, setImportStatus] = useState('');
+
+  const refresh = () => setRoutes(DB.routes());
+
+  const createRoute = () => {
+    if (!form.name.trim()) return;
+    const all = DB.routes();
+    const route = {
+      id: Date.now(),
+      name: form.name.trim(),
+      desc: form.desc.trim(),
+      startKm: parseFloat(form.startKm)||0,
+      endKm: parseFloat(form.endKm)||100,
+      objects: [],
+      timetable: [],
+      trips: [],
+    };
+    DB.saveRoutes([...all, route]);
+    refresh();
+    setShowCreate(false);
+    setForm({ name:'', desc:'', startKm:'0', endKm:'100' });
+  };
+
+  const deleteRoute = (id) => {
+    if (!confirm('Strecke wirklich löschen?')) return;
+    DB.saveRoutes(DB.routes().filter(r => r.id !== id));
+    refresh();
+  };
+
+  const exportRoute = (route) => {
+    const data = JSON.stringify(route, null, 2);
+    const blob = new Blob([data], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `${route.name.replace(/\s+/g,'-')}.json`;
+    a.click();
+  };
+
+  const importFromUrl = async () => {
+    setImportStatus('Lade...');
+    try {
+      const res = await fetch(importUrl);
+      const route = await res.json();
+      route.id = Date.now();
+      DB.saveRoutes([...DB.routes(), route]);
+      refresh();
+      setImportStatus('');
+      setShowImport(false);
+      setImportUrl('');
+    } catch(e) {
+      setImportStatus('Fehler: ' + e.message);
+    }
+  };
+
+  const importFile = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const route = JSON.parse(ev.target.result);
+        route.id = Date.now();
+        DB.saveRoutes([...DB.routes(), route]);
+        refresh();
+      } catch { alert('Ungültige JSON-Datei'); }
+    };
+    reader.readAsText(file);
+  };
+
+  return (
+    <>
+    <div className="topbar">
+      <span className="topbar-title">TSW EBuLa</span>
+      <label className="btn btn-ghost btn-sm" style={{cursor:'pointer'}}>
+        <Icon name="import"/> Importieren
+        <input type="file" accept=".json" style={{display:'none'}} onChange={importFile}/>
+      </label>
+      <button className="btn btn-ghost btn-sm" onClick={() => setShowImport(true)}>
+        <Icon name="cloud"/> URL
+      </button>
+    </div>
+    <div className="content">
+    <div className="screen">
+      {routes.length === 0 ? (
+        <div className="empty">
+          <div className="empty-icon">🚆</div>
+          <div>Noch keine Strecken angelegt.</div>
+          <div style={{fontSize:13,color:'#475569'}}>Tippe auf + um eine neue zu erstellen</div>
+        </div>
+      ) : routes.map(route => (
+        <div className="route-card" key={route.id}>
+          <div className="route-card-header">
+            <div style={{flex:1}}>
+              <div style={{fontWeight:700,fontSize:16}}>{route.name}</div>
+              {route.desc && <div style={{fontSize:12,color:'var(--muted)'}}>{route.desc}</div>}
+              <div style={{fontSize:11,color:'var(--primary)',fontFamily:'var(--mono)',marginTop:2}}>
+                km {route.startKm} – {route.endKm} · {(route.objects||[]).length} Obj. · {(route.timetable||[]).length} Halte
+              </div>
+            </div>
+          </div>
+          <div className="route-actions">
+            <button className="btn btn-ghost btn-sm" onClick={() => onNavigate('editor', route.id)}>
+              <Icon name="route"/> Strecke
+            </button>
+            <button className="btn btn-ghost btn-sm" onClick={() => onNavigate('timetable', route.id)}>
+              <Icon name="timetable"/> Fahrplan
+            </button>
+            <button className="btn btn-primary btn-sm" onClick={() => onNavigate('drive', route.id)}>
+              <Icon name="drive"/> Fahrt starten
+            </button>
+            <button className="btn btn-ghost btn-sm" onClick={() => exportRoute(route)} style={{marginLeft:'auto'}}>
+              <Icon name="export"/>
+            </button>
+            <button className="btn btn-danger btn-sm" onClick={() => deleteRoute(route.id)}>
+              <Icon name="trash"/>
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+    </div>
+    <button className="fab" onClick={() => setShowCreate(true)}>＋</button>
+
+    {showCreate && (
+      <Modal title="Neue Strecke" onClose={() => setShowCreate(false)}
+        actions={<button className="btn btn-primary" onClick={createRoute}>Erstellen</button>}>
+        <Field label="Name"><input className="input" value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder="z.B. München – Augsburg"/></Field>
+        <Field label="Beschreibung (optional)"><input className="input" value={form.desc} onChange={e=>setForm({...form,desc:e.target.value})}/></Field>
+        <div className="input-row">
+          <Field label="Start-km"><input className="input" type="number" value={form.startKm} onChange={e=>setForm({...form,startKm:e.target.value})}/></Field>
+          <Field label="End-km"><input className="input" type="number" value={form.endKm} onChange={e=>setForm({...form,endKm:e.target.value})}/></Field>
+        </div>
+      </Modal>
+    )}
+
+    {showImport && (
+      <Modal title="Von GitHub importieren" onClose={() => setShowImport(false)}
+        actions={<button className="btn btn-primary" onClick={importFromUrl}>Importieren</button>}>
+        <Field label="GitHub Raw-URL">
+          <input className="input" value={importUrl} onChange={e=>setImportUrl(e.target.value)} placeholder="https://raw.githubusercontent.com/..."/>
+        </Field>
+        {importStatus && <div style={{color:'var(--accent)',fontSize:13}}>{importStatus}</div>}
+      </Modal>
+    )}
+    </>
+  );
+}
+
+// ─── ROUTE EDITOR ─────────────────────────────────────────────────────────────
+function RouteEditor({ routeId, onNavigate }) {
+  const [route, setRoute] = useState(null);
+  const [showAdd, setShowAdd] = useState(false);
+  const [editing, setEditing] = useState(null);
+  const [form, setForm] = useState({ km:'', type:'STATION', name:'', speed:'', speedEnd:'', gradient:'', notes:'' });
+
+  useEffect(() => {
+    const r = DB.routes().find(r => r.id === routeId);
+    setRoute(r || null);
+  }, [routeId]);
+
+  const save = (objs) => {
+    const all = DB.routes().map(r => r.id === routeId ? {...r, objects: objs} : r);
+    DB.saveRoutes(all);
+    setRoute(r => ({...r, objects: objs}));
+  };
+
+  const openAdd = () => {
+    setForm({ km:'', type:'STATION', name:'', speed:'', speedEnd:'', gradient:'', notes:'' });
+    setEditing(null);
+    setShowAdd(true);
+  };
+
+  const openEdit = (obj) => {
+    setForm({
+      km: String(obj.km), type: obj.type, name: obj.name||'',
+      speed: String(obj.speed||''), speedEnd: String(obj.speedEnd||''),
+      gradient: String(obj.gradient||''), notes: obj.notes||''
+    });
+    setEditing(obj);
+    setShowAdd(true);
+  };
+
+  const saveObj = () => {
+    const km = parseFloat(form.km.replace(',','.'));
+    if (isNaN(km)) return;
+    const obj = {
+      id: editing?.id || Date.now(),
+      km, type: form.type, name: form.name,
+      speed: parseInt(form.speed)||null,
+      speedEnd: parseFloat(form.speedEnd)||null,
+      gradient: parseFloat(form.gradient.replace(',','.'))||null,
+      notes: form.notes,
+    };
+    const objs = route.objects || [];
+    const updated = editing
+      ? objs.map(o => o.id === editing.id ? obj : o)
+      : [...objs, obj];
+    save(updated.sort((a,b) => a.km - b.km));
+    setShowAdd(false);
+  };
+
+  const deleteObj = (id) => {
+    save((route.objects||[]).filter(o => o.id !== id));
+  };
+
+  if (!route) return <div style={{padding:20,color:'var(--muted)'}}>Strecke nicht gefunden</div>;
+
+  const needsSpeed = ['SPEED_CHANGE','SLOW_SPEED'].includes(form.type);
+  const needsGradient = form.type === 'GRADIENT';
+
+  return (
+    <>
+    <div className="topbar">
+      <button className="btn-icon" onClick={() => onNavigate('home')}><Icon name="back"/></button>
+      <span className="topbar-title" style={{fontSize:14}}>{route.name}</span>
+      <span className="topbar-sub">Strecken-Editor</span>
+    </div>
+    <div className="content">
+    <div className="screen">
+      {(!route.objects || route.objects.length === 0) ? (
+        <div className="empty">
+          <div className="empty-icon">🛤️</div>
+          <div>Noch keine Streckenobjekte.<br/>Tippe auf + um eines hinzuzufügen.</div>
+        </div>
+      ) : (route.objects||[]).map(obj => {
+        const t = OBJ_TYPES[obj.type];
+        return (
+          <div className="km-strip" key={obj.id} style={{borderLeftColor: t.color}}>
+            <span className="km-label">km {obj.km.toFixed(3)}</span>
+            <span className="obj-type-badge" style={{background: t.bg, color: t.color}}>{t.short}</span>
+            <div style={{flex:1}}>
+              <div className="obj-name">{obj.name || t.label}</div>
+              <div className="obj-sub">
+                {obj.speed && `${obj.speed} km/h`}
+                {obj.speedEnd && ` bis km ${obj.speedEnd}`}
+                {obj.gradient !== null && obj.gradient !== undefined && `${obj.gradient > 0 ? '↗' : '↘'} ${Math.abs(obj.gradient)}‰`}
+                {obj.notes && ` · ${obj.notes}`}
+              </div>
+            </div>
+            <button className="btn-icon" onClick={() => openEdit(obj)}>✏️</button>
+            <button className="btn-icon" onClick={() => deleteObj(obj.id)}>🗑</button>
+          </div>
+        );
+      })}
+    </div>
+    </div>
+    <button className="fab" onClick={openAdd}>＋</button>
+
+    {showAdd && (
+      <Modal title={editing ? 'Objekt bearbeiten' : 'Objekt hinzufügen'} onClose={() => setShowAdd(false)}
+        actions={<button className="btn btn-primary" onClick={saveObj}>Speichern</button>}>
+        <div className="input-row">
+          <Field label="Position (km)">
+            <input className="input" value={form.km} onChange={e=>setForm({...form,km:e.target.value})} placeholder="12.345" inputMode="decimal"/>
+          </Field>
+          <Field label="Typ">
+            <select className="input" value={form.type} onChange={e=>setForm({...form,type:e.target.value})}>
+              {Object.entries(OBJ_TYPES).map(([k,v]) => <option key={k} value={k}>{v.label}</option>)}
+            </select>
+          </Field>
+        </div>
+        <Field label="Name / Bezeichnung">
+          <input className="input" value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder="z.B. München Hbf"/>
+        </Field>
+        {needsSpeed && <>
+          <Field label="Geschwindigkeit (km/h)">
+            <input className="input" type="number" value={form.speed} onChange={e=>setForm({...form,speed:e.target.value})}/>
+          </Field>
+          {form.type === 'SLOW_SPEED' && <Field label="Ende La (km)">
+            <input className="input" value={form.speedEnd} onChange={e=>setForm({...form,speedEnd:e.target.value})} inputMode="decimal"/>
+          </Field>}
+        </>}
+        {needsGradient && <Field label="Steigung in ‰ (negativ = Gefälle)">
+          <input className="input" value={form.gradient} onChange={e=>setForm({...form,gradient:e.target.value})} inputMode="decimal"/>
+        </Field>}
+        <Field label="Notizen (optional)">
+          <input className="input" value={form.notes} onChange={e=>setForm({...form,notes:e.target.value})}/>
+        </Field>
+      </Modal>
+    )}
+    </>
+  );
+}
+
+// ─── TIMETABLE EDITOR ─────────────────────────────────────────────────────────
+function TimetableEditor({ routeId, onNavigate }) {
+  const [route, setRoute] = useState(null);
+  const [tab, setTab] = useState('stops');
+  const [showAdd, setShowAdd] = useState(false);
+  const [showTrip, setShowTrip] = useState(false);
+  const [editing, setEditing] = useState(null);
+  const [form, setForm] = useState({ km:'', name:'', arrival:'', departure:'', track:'', isStop:true });
+  const [tripForm, setTripForm] = useState({ name:'', mode:'TIME', departure:'', avgSpeed:'80' });
+
+  useEffect(() => {
+    const r = DB.routes().find(r => r.id === routeId);
+    setRoute(r || null);
+  }, [routeId]);
+
+  const saveRoute = (updated) => {
+    const all = DB.routes().map(r => r.id === routeId ? updated : r);
+    DB.saveRoutes(all);
+    setRoute(updated);
+  };
+
+  const saveStop = () => {
+    const km = parseFloat(form.km.replace(',','.'));
+    if (isNaN(km) || !form.name.trim()) return;
+    const stop = { id: editing?.id||Date.now(), km, name:form.name, arrival:form.arrival, departure:form.departure, track:form.track, isStop:form.isStop };
+    const stops = route.timetable||[];
+    const updated = editing ? stops.map(s=>s.id===editing.id?stop:s) : [...stops,stop];
+    saveRoute({...route, timetable: updated.sort((a,b)=>a.km-b.km)});
+    setShowAdd(false);
+  };
+
+  const saveTrip = () => {
+    if (!tripForm.name.trim()) return;
+    const trip = { id: Date.now(), name:tripForm.name, mode:tripForm.mode, departure:tripForm.departure, avgSpeed:parseFloat(tripForm.avgSpeed)||80, offset:0 };
+    saveRoute({...route, trips:[...(route.trips||[]),trip]});
+    setShowTrip(false);
+    setTripForm({ name:'', mode:'TIME', departure:'', avgSpeed:'80' });
+  };
+
+  if (!route) return null;
+
+  return (
+    <>
+    <div className="topbar">
+      <button className="btn-icon" onClick={() => onNavigate('home')}><Icon name="back"/></button>
+      <span className="topbar-title" style={{fontSize:14}}>{route.name}</span>
+      <span className="topbar-sub">Fahrplan</span>
+    </div>
+    <div className="content" style={{display:'flex',flexDirection:'column'}}>
+    <div className="tabs" style={{margin:'0 16px',marginTop:16,flexShrink:0}}>
+      <div className={`tab ${tab==='stops'?'active':''}`} onClick={()=>setTab('stops')}>Halte ({(route.timetable||[]).length})</div>
+      <div className={`tab ${tab==='trips'?'active':''}`} onClick={()=>setTab('trips')}>Fahrten ({(route.trips||[]).length})</div>
+    </div>
+    <div style={{flex:1,overflow:'auto',padding:'0 16px 80px'}}>
+      {tab === 'stops' && (<>
+        {(route.timetable||[]).length===0 ? (
+          <div className="empty"><div className="empty-icon">🗓️</div><div>Noch keine Halte</div></div>
+        ) : (route.timetable||[]).map(s => (
+          <div className="card" key={s.id} style={{display:'flex',alignItems:'center',gap:12}}>
+            <div style={{flex:1}}>
+              <div style={{fontWeight:700}}>{s.name} {s.track && <span style={{color:'var(--muted)',fontWeight:400,fontSize:12}}>Gl. {s.track}</span>}</div>
+              <div style={{fontSize:11,color:'var(--primary)',fontFamily:'var(--mono)'}}>
+                km {s.km.toFixed(3)} {!s.isStop && '· Durchfahrt'}
+              </div>
+              <div style={{fontSize:12,color:'var(--muted)',fontFamily:'var(--mono)'}}>
+                {s.arrival && `an: ${s.arrival}`} {s.departure && `ab: ${s.departure}`}
+              </div>
+            </div>
+            <button className="btn-icon" onClick={()=>{setEditing(s);setForm({km:String(s.km),name:s.name,arrival:s.arrival||'',departure:s.departure||'',track:s.track||'',isStop:s.isStop});setShowAdd(true);}}>✏️</button>
+            <button className="btn-icon" onClick={()=>saveRoute({...route,timetable:(route.timetable||[]).filter(x=>x.id!==s.id)})}>🗑</button>
+          </div>
+        ))}
+      </>)}
+
+      {tab === 'trips' && (<>
+        {(route.trips||[]).length===0 ? (
+          <div className="empty"><div className="empty-icon">🚂</div><div>Noch keine Fahrten</div></div>
+        ) : (route.trips||[]).map(t => (
+          <div className="card" key={t.id} style={{display:'flex',alignItems:'center',gap:12}}>
+            <div style={{flex:1}}>
+              <div style={{fontWeight:700}}>{t.name}</div>
+              <div style={{fontSize:12,color:'var(--muted)'}}>
+                {t.mode==='TIME' ? 'Zeitbasiert' : `Ø ${t.avgSpeed} km/h`} · Abfahrt: {t.departure}
+              </div>
+            </div>
+            <button className="btn btn-primary btn-sm" onClick={()=>onNavigate('drive',routeId,t.id)}>▶</button>
+            <button className="btn-icon" onClick={()=>saveRoute({...route,trips:(route.trips||[]).filter(x=>x.id!==t.id)})}>🗑</button>
+          </div>
+        ))}
+      </>)}
+    </div>
+    </div>
+    <button className="fab" onClick={()=>tab==='stops'?(setEditing(null),setForm({km:'',name:'',arrival:'',departure:'',track:'',isStop:true}),setShowAdd(true)):setShowTrip(true)}>＋</button>
+
+    {showAdd && (
+      <Modal title={editing?'Halt bearbeiten':'Halt hinzufügen'} onClose={()=>setShowAdd(false)}
+        actions={<button className="btn btn-primary" onClick={saveStop}>Speichern</button>}>
+        <div className="input-row">
+          <Field label="km"><input className="input" value={form.km} onChange={e=>setForm({...form,km:e.target.value})} inputMode="decimal"/></Field>
+          <Field label="Gleis"><input className="input" value={form.track} onChange={e=>setForm({...form,track:e.target.value})} placeholder="1"/></Field>
+        </div>
+        <Field label="Bahnhofsname"><input className="input" value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder="München Hbf"/></Field>
+        <div className="input-row">
+          <Field label="Ankunft (HH:mm)"><input className="input" value={form.arrival} onChange={e=>setForm({...form,arrival:e.target.value})} placeholder="09:42"/></Field>
+          <Field label="Abfahrt (HH:mm)"><input className="input" value={form.departure} onChange={e=>setForm({...form,departure:e.target.value})} placeholder="09:45"/></Field>
+        </div>
+        <label className="check-row"><input type="checkbox" checked={form.isStop} onChange={e=>setForm({...form,isStop:e.target.checked})}/> Planmäßiger Halt</label>
+      </Modal>
+    )}
+
+    {showTrip && (
+      <Modal title="Fahrt anlegen" onClose={()=>setShowTrip(false)}
+        actions={<button className="btn btn-primary" onClick={saveTrip}>Erstellen</button>}>
+        <Field label="Zugname / Zugnummer"><input className="input" value={tripForm.name} onChange={e=>setTripForm({...tripForm,name:e.target.value})} placeholder="ICE 123"/></Field>
+        <Field label="Abfahrtszeit (HH:mm)"><input className="input" value={tripForm.departure} onChange={e=>setTripForm({...tripForm,departure:e.target.value})} placeholder="09:00"/></Field>
+        <Field label="Berechnungsmethode">
+          <select className="input" value={tripForm.mode} onChange={e=>setTripForm({...tripForm,mode:e.target.value})}>
+            <option value="TIME">Zeitbasiert (Fahrplan-Interpolation)</option>
+            <option value="SPEED">Ø-Geschwindigkeit</option>
+          </select>
+        </Field>
+        {tripForm.mode==='SPEED' && <Field label="Ø-Geschwindigkeit (km/h)"><input className="input" type="number" value={tripForm.avgSpeed} onChange={e=>setTripForm({...tripForm,avgSpeed:e.target.value})}/></Field>}
+      </Modal>
+    )}
+    </>
+  );
+}
+
+// ─── DRIVE SCREEN ─────────────────────────────────────────────────────────────
+function DriveScreen({ routeId, tripId, onNavigate }) {
+  const [route, setRoute] = useState(null);
+  const [trip, setTrip] = useState(null);
+  const [currentTime, setCurrentTime] = useState('');
+  const [currentKm, setCurrentKm] = useState(0);
+  const [autoScroll, setAutoScroll] = useState(true);
+  const [running, setRunning] = useState(false);
+  const [showOffset, setShowOffset] = useState(false);
+  const tickRef = useRef(null);
+  const listRef = useRef(null);
+
+  useEffect(() => {
+    const r = DB.routes().find(r => r.id === routeId);
+    setRoute(r);
+    if (r && tripId) {
+      const t = (r.trips||[]).find(t => t.id === tripId);
+      setTrip(t);
+      if (t?.departure) setCurrentTime(t.departure);
+    }
+  }, [routeId, tripId]);
+
+  useEffect(() => {
+    if (!route || !trip) return;
+    const km = calcKm(currentTime, trip, route.timetable||[]);
+    setCurrentKm(km);
+  }, [currentTime, trip, route]);
+
+  useEffect(() => {
+    if (running) {
+      tickRef.current = setInterval(() => {
+        setCurrentTime(t => advanceSec(t, 1));
+      }, 1000);
+    } else {
+      clearInterval(tickRef.current);
+    }
+    return () => clearInterval(tickRef.current);
+  }, [running]);
+
+  // Auto-scroll
+  useEffect(() => {
+    if (!autoScroll || !listRef.current || !route) return;
+    const items = buildItems(route.objects||[], route.timetable||[]);
+    const idx = items.findLastIndex ? items.findLastIndex(i => i.km <= currentKm) : [...items].reverse().findIndex(i => i.km <= currentKm);
+    if (idx >= 0) {
+      const el = listRef.current.children[idx];
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [currentKm, autoScroll]);
+
+  const adjustOffset = (delta) => {
+    if (!trip) return;
+    const newTrip = {...trip, offset: (trip.offset||0) + delta};
+    setTrip(newTrip);
+    const all = DB.routes().map(r => r.id===routeId ? {...r, trips:(r.trips||[]).map(t=>t.id===tripId?newTrip:t)} : r);
+    DB.saveRoutes(all);
+  };
+
+  if (!route) return null;
+  const items = buildItems(route.objects||[], route.timetable||[]);
+  const progress = route ? Math.max(0, Math.min(1, (currentKm - route.startKm) / (route.endKm - route.startKm))) : 0;
+  const timetable = route.timetable||[];
+  const nextStop = timetable.find(s => s.km > currentKm && s.isStop);
+  const prevStop = [...timetable].reverse().find(s => s.km <= currentKm && s.isStop);
+
+  return (
+    <div className="drive-layout">
+      <div className="drive-hud">
+        <button className="btn-icon" onClick={() => { setRunning(false); onNavigate('home'); }} style={{color:'var(--muted)'}}>←</button>
+        <div className="hud-item">
+          <div className="hud-label">km</div>
+          <div className="hud-value">{currentKm.toFixed(1)}</div>
+        </div>
+        <div className="hud-next">
+          {prevStop && <div style={{fontSize:11,color:'var(--muted)'}}>{prevStop.name}</div>}
+          {nextStop && <>
+            <div className="hud-next-name">▶ {nextStop.name}</div>
+            <div className="hud-next-time">{nextStop.arrival || nextStop.departure}</div>
+          </>}
+        </div>
+        <div className="hud-item">
+          <div className="hud-label">Zeit</div>
+          <input className="time-input-big" value={currentTime} onChange={e=>setCurrentTime(e.target.value)} onFocus={()=>setRunning(false)}/>
+        </div>
+        <button className="btn-icon" onClick={()=>setAutoScroll(a=>!a)} title="Auto-Scroll">
+          {autoScroll ? '🔒' : '🔓'}
+        </button>
+      </div>
+
+      <div className="progress-bar">
+        <div className="progress-fill" style={{width:`${progress*100}%`}}/>
+      </div>
+
+      <div className="ebula-container">
+        <div className="km-scale">
+          {items.map((item, i) => (
+            <div key={i} className={`km-row ${item.isStation?'station-km':''}`}>
+              <span className={`km-text ${Math.abs(item.km-currentKm)<0.5?'active':''}`}>{item.km.toFixed(1)}</span>
+            </div>
+          ))}
+        </div>
+        <div className="ebula-list" ref={listRef}>
+          {items.map((item, i) => {
+            const passed = item.km < currentKm - 0.2;
+            const isCurrent = Math.abs(item.km - currentKm) < 0.5;
+            return (
+              <div key={i} className={`ebula-row ${passed?'passed':''} ${isCurrent?'current':''} ${item.isStation?'station':''}`}>
+                <div className="ebula-line"/>
+                <div className="ebula-sym" style={item.isStation ? {background:'#1e3a8a55',color:'#60a5fa',width:40,height:40} : {background:item.bg,color:item.color}}>
+                  {item.short}
+                </div>
+                <div className="ebula-text">
+                  <div className="ebula-name">{item.label}</div>
+                  {item.detail && <div className="ebula-detail">{item.detail}</div>}
+                </div>
+                {isCurrent && <span className="pos-arrow">◀</span>}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="drive-controls">
+        <button className="btn btn-ghost btn-sm" onClick={()=>setShowOffset(s=>!s)}>
+          ⚙️ km-Versatz {trip?.offset ? `(${trip.offset>0?'+':''}${trip.offset.toFixed(1)})` : ''}
+        </button>
+        {showOffset && <>
+          {[-1, -0.1, 0.1, 1].map(d => (
+            <button key={d} className="offset-btn" onClick={()=>adjustOffset(d)}>{d>0?'+':''}{d}</button>
+          ))}
+          <button className="offset-btn" onClick={()=>adjustOffset(-(trip?.offset||0))}>↺</button>
+        </>}
+        <button className={`btn btn-sm ${running ? 'btn-danger' : 'btn-primary'}`} onClick={()=>setRunning(r=>!r)}>
+          {running ? '⏹ Stop' : '▶ Start'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function buildItems(objects, timetable) {
+  const items = [];
+  objects.forEach(obj => {
+    const t = OBJ_TYPES[obj.type];
+    let detail = '';
+    if (obj.speed) detail += `${obj.speed} km/h`;
+    if (obj.speedEnd) detail += ` bis km ${obj.speedEnd}`;
+    if (obj.gradient != null) detail += `${obj.gradient > 0 ? ' ↗' : ' ↘'} ${Math.abs(obj.gradient)}‰`;
+    if (obj.notes) detail += (detail ? ' · ' : '') + obj.notes;
+    items.push({ km: obj.km, short: t.short, label: obj.name || t.label, detail: detail||null, color: t.color, bg: t.bg, isStation: obj.type==='STATION' });
+  });
+  timetable.forEach(s => {
+    if (!objects.find(o => o.type==='STATION' && Math.abs(o.km-s.km)<0.05)) {
+      items.push({
+        km: s.km, short: 'Bf', label: s.name,
+        detail: [s.arrival&&`an: ${s.arrival}`, s.departure&&`ab: ${s.departure}`, s.track&&`Gl. ${s.track}`].filter(Boolean).join(' · '),
+        color: '#60a5fa', bg: '#1e3a8a33', isStation: true
+      });
+    }
+  });
+  return items.sort((a,b) => a.km - b.km);
+}
+
+// ─── APP ROOT ─────────────────────────────────────────────────────────────────
+function App() {
+  const [screen, setScreen] = useState('home');
+  const [routeId, setRouteId] = useState(null);
+  const [tripId, setTripId] = useState(null);
+
+  const navigate = (s, rid, tid) => {
+    setScreen(s);
+    if (rid !== undefined) setRouteId(rid);
+    if (tid !== undefined) setTripId(tid);
+  };
+
+  if (screen === 'drive') return <DriveScreen routeId={routeId} tripId={tripId} onNavigate={navigate}/>;
+
+  return (
+    <div className="app">
+      {screen === 'home' && <HomeScreen onNavigate={navigate}/>}
+      {screen === 'editor' && <RouteEditor routeId={routeId} onNavigate={navigate}/>}
+      {screen === 'timetable' && <TimetableEditor routeId={routeId} onNavigate={navigate}/>}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
