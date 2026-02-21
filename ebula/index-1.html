@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>EBuLa · TSW</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+:root {
+  --bg:      #0c0c0f;
+  --s1:      #111115;
+  --s2:      #17171d;
+  --s3:      #1e1e26;
+  --b1:      #252530;
+  --b2:      #303040;
+  --text:    #c8c8d8;
+  --dim:     #72728a;
+  --faint:   #3a3a50;
+  --primary: #4a90d4;
+  --pri2:    #2a5a9a;
+  --accent:  #c8a030;
+  --green:   #3a9a60;
+  --green2:  #50c870;
+  --red:     #c04040;
+  --yellow:  #c8b030;
+  --mono:    'IBM Plex Mono', monospace;
+  --sans:    'IBM Plex Sans', sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body,#root{height:100%;overflow:hidden;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;}
+::-webkit-scrollbar{width:3px;height:3px;}
+::-webkit-scrollbar-thumb{background:var(--b2);}
+
+/* ── base ── */
+.app{display:flex;flex-direction:column;height:100dvh;}
+.topbar{display:flex;align-items:center;gap:10px;padding:0 14px;height:44px;background:var(--s1);border-bottom:1px solid var(--b1);flex-shrink:0;}
+.topbar-brand{font-family:var(--mono);font-size:12px;letter-spacing:4px;color:var(--primary);flex:1;}
+.topbar-label{font-family:var(--mono);font-size:10px;color:var(--faint);letter-spacing:1px;}
+.scroll{flex:1;overflow-y:auto;padding:14px;}
+
+/* ── buttons ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:0 13px;height:32px;border-radius:3px;border:none;cursor:pointer;font-family:var(--sans);font-size:12px;font-weight:500;transition:background .1s,color .1s;white-space:nowrap;}
+.btn-p{background:var(--pri2);color:#d0e8ff;border:1px solid var(--primary)55;}
+.btn-p:hover{background:var(--primary);color:#fff;}
+.btn-o{background:transparent;color:var(--dim);border:1px solid var(--b2);}
+.btn-o:hover{background:var(--s3);color:var(--text);}
+.btn-x{background:transparent;color:var(--red);border:1px solid var(--red)30;}
+.btn-x:hover{background:var(--red)18;}
+.btn-sm{height:26px;padding:0 9px;font-size:11px;}
+.ic{width:30px;height:30px;border-radius:3px;background:transparent;border:1px solid var(--b1);cursor:pointer;color:var(--faint);font-size:13px;display:inline-flex;align-items:center;justify-content:center;transition:all .1s;}
+.ic:hover{background:var(--s3);color:var(--text);border-color:var(--b2);}
+.fab{position:fixed;bottom:18px;right:16px;width:44px;height:44px;border-radius:50%;background:var(--pri2);border:1px solid var(--primary)66;cursor:pointer;font-size:20px;color:#d0e8ff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 24px #4a90d440;z-index:40;}
+
+/* ── form ── */
+.field{margin-bottom:11px;}
+.field>label{display:block;font-family:var(--mono);font-size:10px;color:var(--faint);margin-bottom:4px;text-transform:uppercase;letter-spacing:.8px;}
+.inp{width:100%;background:var(--s2);border:1px solid var(--b1);border-radius:3px;padding:7px 9px;color:var(--text);font-family:var(--sans);font-size:13px;outline:none;transition:border .1s;}
+.inp:focus{border-color:var(--pri2);}
+select.inp{cursor:pointer;}
+.irow{display:flex;gap:8px;}.irow .field{flex:1;}
+.chk{display:flex;align-items:center;gap:7px;cursor:pointer;font-size:13px;padding:3px 0;}
+.chk input{width:14px;height:14px;accent-color:var(--primary);cursor:pointer;}
+
+/* ── modal ── */
+.ov{position:fixed;inset:0;background:#000000a0;z-index:200;display:flex;align-items:flex-end;}
+.sheet{background:var(--s1);border:1px solid var(--b1);border-top:2px solid var(--pri2);border-radius:12px 12px 0 0;width:100%;max-height:92dvh;overflow-y:auto;padding:18px 15px;}
+.sheet-h{font-size:15px;font-weight:600;margin-bottom:14px;}
+.sheet-f{display:flex;gap:7px;justify-content:flex-end;margin-top:14px;padding-top:11px;border-top:1px solid var(--b1);}
+.sep{height:1px;background:var(--b1);margin:11px 0;}
+
+/* ── home cards ── */
+.rcard{background:var(--s1);border:1px solid var(--b1);border-radius:4px;margin-bottom:9px;}
+.rcard-h{padding:11px 13px;display:flex;align-items:center;gap:9px;}
+.rcard-n{font-weight:600;font-size:14px;}
+.rcard-m{font-family:var(--mono);font-size:10px;color:var(--faint);margin-top:2px;}
+.rcard-a{display:flex;gap:6px;padding:8px 13px;background:var(--s2);border-top:1px solid var(--b1);flex-wrap:wrap;}
+
+/* ── editor object rows ── */
+.obj-r{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--b1);}
+.obj-km{font-family:var(--mono);font-size:10px;color:var(--dim);width:52px;flex-shrink:0;}
+.obj-tag{padding:2px 6px;border-radius:2px;font-family:var(--mono);font-size:10px;font-weight:600;flex-shrink:0;}
+.obj-n{flex:1;}
+.obj-nl{font-size:13px;font-weight:500;}
+.obj-nd{font-family:var(--mono);font-size:10px;color:var(--dim);}
+
+/* ── empty ── */
+.empty{display:flex;flex-direction:column;align-items:center;padding:56px 20px;gap:8px;color:var(--faint);text-align:center;}
+
+/* ── tabs ── */
+.tabs{display:flex;border-bottom:1px solid var(--b1);margin-bottom:13px;}
+.tab{padding:7px 13px;font-size:12px;color:var(--faint);cursor:pointer;border-bottom:2px solid transparent;font-family:var(--mono);letter-spacing:.5px;transition:all .1s;}
+.tab.on{color:var(--primary);border-bottom-color:var(--primary);}
+
+/* ═══════════════════════════════════════════
+   EBULA FAHRTANSICHT — authentisches Layout
+═══════════════════════════════════════════ */
+.drive{display:flex;flex-direction:column;height:100dvh;background:#08080b;}
+
+/* ── HUD ── */
+.hud{display:flex;align-items:stretch;background:var(--s1);border-bottom:2px solid var(--b1);flex-shrink:0;}
+.hud-cell{display:flex;flex-direction:column;justify-content:center;padding:8px 12px;border-right:1px solid var(--b1);}
+.hud-cell:last-child{border-right:none;}
+.hud-lbl{font-family:var(--mono);font-size:8px;color:var(--faint);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:2px;}
+.hud-val{font-family:var(--mono);font-size:24px;font-weight:600;color:var(--primary);line-height:1;}
+.hud-center{flex:1;display:flex;flex-direction:column;justify-content:center;padding:6px 12px;text-align:center;}
+.hud-next-n{font-size:13px;font-weight:600;color:var(--text);}
+.hud-next-d{font-family:var(--mono);font-size:10px;color:var(--accent);margin-top:1px;}
+.hud-prev{font-family:var(--mono);font-size:9px;color:var(--faint);}
+.hud-time-cell{display:flex;flex-direction:column;justify-content:center;align-items:flex-end;padding:6px 10px;gap:4px;}
+.hud-time-inp{font-family:var(--mono);font-size:20px;font-weight:600;color:var(--text);background:var(--s2);border:1px solid var(--b2);border-radius:3px;width:76px;text-align:center;padding:4px 5px;outline:none;}
+
+/* ── Fortschritt ── */
+.prog{height:2px;background:var(--s3);flex-shrink:0;}
+.prog-f{height:100%;background:linear-gradient(90deg,var(--pri2),var(--primary));transition:width .8s linear;}
+
+/* ═══════════════════════════════════════════
+   ECHTER BUCHFAHRPLAN STREIFEN
+   ┌─────┬───┬──────────────────────────────┐
+   │ km  │Gl.│  Objekte / Bahnhöfe          │
+   └─────┴───┴──────────────────────────────┘
+   Links außen: La, V, BÜ (wirken auf Zug)
+   Mitte:       Gleis-Linie + Sym
+   Rechts:      Sig, Tu, ‰, Notizen
+═══════════════════════════════════════════ */
+.bfp-wrap{flex:1;display:flex;overflow:hidden;}
+
+/* Km-Skala */
+.km-col{width:40px;flex-shrink:0;background:#07070a;border-right:1px solid var(--b1);overflow:hidden;}
+.km-col-inner{display:flex;flex-direction:column;}
+
+/* Linke Spalte: La, V, BÜ */
+.left-col{width:72px;flex-shrink:0;}
+
+/* Gleisband in der Mitte */
+.track-col{width:52px;flex-shrink:0;position:relative;}
+
+/* Rechte Spalte: Sig, Tu, ‰ */
+.right-col{flex:1;}
+
+/* Scrollbarer Hauptbereich */
+.bfp-scroll{flex:1;overflow-y:auto;display:flex;}
+.bfp-left{width:72px;flex-shrink:0;}
+.bfp-track{width:52px;flex-shrink:0;}
+.bfp-right{flex:1;}
+
+/* ── eine Zeile ── */
+.brow{display:flex;position:relative;}
+.brow-left{width:72px;flex-shrink:0;display:flex;align-items:center;justify-content:flex-end;padding-right:5px;}
+.brow-mid{width:52px;flex-shrink:0;display:flex;align-items:center;justify-content:center;position:relative;}
+.brow-right{flex:1;display:flex;align-items:center;padding-left:6px;overflow:hidden;}
+
+/* Streckenlinie — das eigentliche Gleis */
+.gleis{position:absolute;top:0;bottom:0;width:3px;background:var(--b2);left:50%;transform:translateX(-50%);z-index:0;}
+.gleis.passed{background:var(--s3);}
+.gleis.cur{background:var(--green2);}
+
+/* Bahnhofs-Symbol auf dem Gleis */
+.bf-sym{width:13px;height:13px;border-radius:50%;background:var(--text);border:2px solid #08080b;z-index:2;position:relative;flex-shrink:0;}
+.bf-sym.dim{background:var(--faint);}
+.bf-sym.passed{background:var(--faint);}
+.bf-sym.skip{width:8px;height:8px;background:var(--b2);}
+
+/* Querlinie bei V/La */
+.vline{position:absolute;top:50%;left:0;right:0;height:2px;z-index:1;}
+
+/* Positions-Raute */
+.pos-diamond{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%) rotate(45deg);
+  width:13px;height:13px;
+  background:var(--green2);
+  border:2px solid #08080b;
+  z-index:10;
+}
+.pos-arm-l{position:absolute;top:50%;right:calc(50% + 7px);height:1px;width:66px;background:var(--green2);opacity:.25;z-index:9;}
+.pos-arm-r{position:absolute;top:50%;left:calc(50% + 7px);height:1px;width:100px;background:var(--green2);opacity:.25;z-index:9;}
+
+/* Texte */
+.bf-name{font-family:var(--mono);font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.bf-times{font-family:var(--mono);font-size:10px;color:var(--accent);}
+.bf-gleis{font-family:var(--mono);font-size:9px;color:var(--faint);}
+.sym-l{font-family:var(--mono);font-size:10px;font-weight:600;text-align:right;line-height:1.2;}
+.sym-r{font-family:var(--mono);font-size:10px;color:var(--dim);line-height:1.2;}
+.km-tick{display:flex;align-items:center;justify-content:flex-end;padding-right:3px;}
+.km-n{font-family:var(--mono);font-size:8px;color:var(--faint);}
+.km-n.maj{color:var(--dim);}
+.km-n.act{color:var(--primary);}
+
+/* ── Fußzeile ── */
+.drive-foot{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--s1);border-top:1px solid var(--b1);flex-shrink:0;flex-wrap:wrap;}
+.offset-wrap{display:flex;align-items:center;gap:3px;background:var(--s2);border:1px solid var(--b1);border-radius:3px;padding:3px 5px;}
+.ob{background:var(--s3);border:1px solid var(--b2);border-radius:2px;color:var(--text);font-family:var(--mono);font-size:10px;padding:2px 5px;cursor:pointer;}
+.ob:hover{background:var(--b2);}
+.ov-val{font-family:var(--mono);font-size:10px;color:var(--accent);min-width:34px;text-align:center;}
+
+/* ── Tutorial ── */
+.tut-bg{position:fixed;inset:0;z-index:500;}
+.tut-dim{position:fixed;inset:0;background:#000000b0;z-index:500;pointer-events:none;}
+.tut-card{position:fixed;z-index:501;background:var(--s1);border:1px solid var(--pri2);border-top:2px solid var(--primary);border-radius:8px;padding:16px;width:calc(100% - 28px);max-width:380px;bottom:76px;left:50%;transform:translateX(-50%);}
+.tut-step{font-family:var(--mono);font-size:9px;color:var(--faint);margin-bottom:3px;letter-spacing:1px;}
+.tut-title{font-size:14px;font-weight:600;margin-bottom:6px;}
+.tut-text{font-size:12px;color:var(--dim);line-height:1.55;margin-bottom:11px;}
+.tut-dots{display:flex;gap:4px;margin-bottom:10px;}
+.tut-dot{height:2px;flex:1;border-radius:1px;background:var(--b2);}
+.tut-dot.on{background:var(--primary);}
+.tut-nav{display:flex;gap:7px;justify-content:flex-end;}
+</style>
+</head>
+<body><div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef, useMemo } = React;
+
+/* ──────────────────────────────
+   TYPEN
+────────────────────────────── */
+const T = {
+  STATION:  { l:'Bahnhof / Hp',           s:'Bf',  col:'track', clr:'#b0b8d0', bg:'#1e2030' },
+  SPEED:    { l:'Geschwindigkeitswechsel', s:'V',   col:'left',  clr:'#c8b030', bg:'#282210' },
+  LA:       { l:'Langsamfahrstelle',       s:'La',  col:'left',  clr:'#c04040', bg:'#201010' },
+  BUE:      { l:'Bahnübergang',            s:'BÜ',  col:'left',  clr:'#c04040', bg:'#201010' },
+  SIGNAL:   { l:'Signal',                  s:'Sig', col:'right', clr:'#606878', bg:'#101418' },
+  TU_START: { l:'Tunnelanfang',            s:'Tu▸', col:'right', clr:'#485060', bg:'#101418' },
+  TU_END:   { l:'Tunnelende',              s:'▸Tu', col:'right', clr:'#485060', bg:'#101418' },
+  GRADE:    { l:'Steigung/Gefälle',        s:'‰',   col:'right', clr:'#3a8050', bg:'#0c1810' },
+};
+const LEFT  = ['SPEED','LA','BUE'];
+const RIGHT = ['SIGNAL','TU_START','TU_END','GRADE'];
+const ROW_H = 30;
+const STA_H = 52;
+
+/* ──────────────────────────────
+   STORAGE
+────────────────────────────── */
+const DB = {
+  get:    ()      => { try{ return JSON.parse(localStorage.getItem('ebula3')||'[]'); }catch{ return []; } },
+  set:    d       => localStorage.setItem('ebula3', JSON.stringify(d)),
+  tut:    ()      => localStorage.getItem('ebula_tut2')==='1',
+  doneTut:()      => localStorage.setItem('ebula_tut2','1'),
+};
+
+/* ──────────────────────────────
+   ZEIT-UTILS
+────────────────────────────── */
+const toS  = t => { if(!t)return null; const[h,m]=t.split(':').map(Number); return h*3600+m*60; };
+const fmtS = s => { s=((s%86400)+86400)%86400; return `${String(Math.floor(s/3600)).padStart(2,'0')}:${String(Math.floor(s%3600/60)).padStart(2,'0')}`; };
+const diff = (a,b) => { let d=toS(b)-toS(a); if(d<0)d+=86400; return d; };
+
+function calcKm(time, trip, served) {
+  if(!time||!trip) return trip?.startKm||0;
+  const off = trip.offset||0;
+  if(trip.mode==='SPEED') return diff(trip.departure,time)/3600*trip.avgSpeed+(trip.startKm||0)+off;
+  const anch = served
+    .filter(s=>s.departure||s.arrival)
+    .map(s=>({km:s.km,sec:toS(s.departure||s.arrival)}))
+    .sort((a,b)=>a.km-b.km);
+  if(!anch.length) return (trip.startKm||0)+off;
+  const c=toS(time);
+  if(c<=anch[0].sec) return anch[0].km+off;
+  if(c>=anch.at(-1).sec) return anch.at(-1).km+off;
+  for(let i=0;i<anch.length-1;i++){
+    let[as,bs,cs]=[anch[i].sec,anch[i+1].sec,c];
+    if(bs<as)bs+=86400; if(cs<as)cs+=86400;
+    if(cs>=as&&cs<=bs) return anch[i].km+(anch[i+1].km-anch[i].km)*(cs-as)/(bs-as)+off;
+  }
+  return anch.at(-1).km+off;
+}
+
+/* ──────────────────────────────
+   TUTORIAL
+────────────────────────────── */
+const STEPS=[
+  {t:'Willkommen bei TSW EBuLa',tt:'Diese App simuliert einen elektronischen Buchfahrplan wie er in echten DB-Führerständen verwendet wird.'},
+  {t:'Strecke anlegen',tt:'Tippe auf + um eine neue Strecke zu erstellen. Du gibst Streckenname und die km-Grenzen an.'},
+  {t:'Objekte eintragen',tt:'Im Editor trägst du alle Objekte an ihrer km-Position ein: Bahnhöfe, Geschwindigkeiten, Langsamfahrstellen, BÜ, Signale, Tunnel und Steigungen.'},
+  {t:'Fahrt starten',tt:'Über „Fahrt starten" wählst du welche Bahnhöfe du bedienst, trägst Fahrzeiten ein und gibst deine Abfahrtszeit an.'},
+  {t:'EBuLa-Ansicht',tt:'Die Fahrtansicht zeigt den authentischen Buchfahrplan-Streifen: Km-Skala links, Gleislinie in der Mitte mit Bahnhofssymbolen, Objekte links und rechts daneben. Die grüne Raute markiert deine berechnete Position.'},
+  {t:'Zeit & Korrektur',tt:'Start/Stop lässt die Zeit laufen. Die Zeit kannst du jederzeit direkt eintippen. Mit dem ⚙-Button passt du den km-Versatz an falls das Spiel abweicht.'},
+];
+
+function Tutorial({onDone}){
+  const[s,ss]=useState(0);
+  const last=s===STEPS.length-1;
+  return(<>
+    <div className="tut-dim"/>
+    <div className="tut-card">
+      <div className="tut-step">{s+1} / {STEPS.length}</div>
+      <div className="tut-title">{STEPS[s].t}</div>
+      <div className="tut-text">{STEPS[s].tt}</div>
+      <div className="tut-dots">{STEPS.map((_,i)=><div key={i} className={`tut-dot ${i<=s?'on':''}`}/>)}</div>
+      <div className="tut-nav">
+        {s>0&&<button className="btn btn-o btn-sm" onClick={()=>ss(x=>x-1)}>Zurück</button>}
+        <button className="btn btn-p btn-sm" onClick={()=>last?(DB.doneTut(),onDone()):ss(x=>x+1)}>{last?'Los gehts':'Weiter'}</button>
+        {!last&&<button className="btn btn-o btn-sm" onClick={()=>{DB.doneTut();onDone();}}>Überspringen</button>}
+      </div>
+    </div>
+  </>);
+}
+
+/* ──────────────────────────────
+   GEMEINSAME KOMPONENTEN
+────────────────────────────── */
+function Modal({title,onClose,onOk,okLabel='Speichern',children}){
+  return(
+    <div className="ov" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="sheet">
+        <div className="sheet-h">{title}</div>
+        {children}
+        <div className="sheet-f">
+          <button className="btn btn-o" onClick={onClose}>Abbrechen</button>
+          {onOk&&<button className="btn btn-p" onClick={onOk}>{okLabel}</button>}
+        </div>
+      </div>
+    </div>
+  );
+}
+const F=({label,children})=><div className="field"><label>{label}</label>{children}</div>;
+
+/* ──────────────────────────────
+   HOME
+────────────────────────────── */
+function Home({go}){
+  const[routes,setRoutes]=useState(DB.get());
+  const[showNew,setShowNew]=useState(false);
+  const[showImp,setShowImp]=useState(false);
+  const[form,setForm]=useState({name:'',desc:'',start:'0',end:'100'});
+  const[url,setUrl]=useState('');
+  const[err,setErr]=useState('');
+  const rf=()=>setRoutes(DB.get());
+  const fv=(k,v)=>setForm(p=>({...p,[k]:v}));
+
+  const create=()=>{
+    if(!form.name.trim())return;
+    const r={id:Date.now(),name:form.name.trim(),desc:form.desc.trim(),
+      startKm:parseFloat(form.start)||0,endKm:parseFloat(form.end)||100,objects:[]};
+    DB.set([...DB.get(),r]); rf(); setShowNew(false); setForm({name:'',desc:'',start:'0',end:'100'});
+  };
+  const del=id=>{if(!confirm('Strecke löschen?'))return;DB.set(DB.get().filter(r=>r.id!==id));rf();};
+  const exp=r=>{const a=document.createElement('a');a.href='data:application/json,'+encodeURIComponent(JSON.stringify(r,null,2));a.download=r.name.replace(/\s+/g,'-')+'.json';a.click();};
+  const impUrl=async()=>{setErr('');try{const res=await fetch(url);if(!res.ok)throw new Error('HTTP '+res.status);const r=await res.json();r.id=Date.now();DB.set([...DB.get(),r]);rf();setShowImp(false);setUrl('');}catch(e){setErr('Fehler: '+e.message);}};
+  const impFile=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);d.id=Date.now();DB.set([...DB.get(),d]);rf();}catch{alert('Ungültige Datei');}};r.readAsText(f);};
+
+  const staCnt=r=>(r.objects||[]).filter(o=>o.type==='STATION').length;
+
+  return(<>
+    <div className="topbar">
+      <span className="topbar-brand">EBULA</span>
+      <label className="btn btn-o btn-sm" style={{cursor:'pointer'}}>Import <input type="file" accept=".json" style={{display:'none'}} onChange={impFile}/></label>
+      <button className="btn btn-o btn-sm" onClick={()=>setShowImp(true)}>URL</button>
+    </div>
+    <div className="scroll" style={{paddingBottom:72}}>
+      {routes.length===0?<div className="empty">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" opacity=".3"><path d="M3 12h18M12 3v18"/><circle cx="12" cy="12" r="9"/></svg>
+        <div style={{fontSize:13,fontWeight:600}}>Keine Strecken vorhanden</div>
+        <div style={{fontSize:11}}>+ drücken um eine zu erstellen</div>
+      </div>:routes.map(r=>(
+        <div className="rcard" key={r.id}>
+          <div className="rcard-h">
+            <div style={{flex:1}}>
+              <div className="rcard-n">{r.name}</div>
+              {r.desc&&<div style={{fontSize:11,color:'var(--dim)',marginTop:1}}>{r.desc}</div>}
+              <div className="rcard-m">km {r.startKm.toFixed(1)} – {r.endKm.toFixed(1)} · {(r.objects||[]).length} Objekte · {staCnt(r)} Bahnhöfe</div>
+            </div>
+          </div>
+          <div className="rcard-a">
+            <button className="btn btn-o btn-sm" onClick={()=>go('editor',r.id)}>Editor</button>
+            <button className="btn btn-p btn-sm" onClick={()=>go('start',r.id)}>Fahrt starten</button>
+            <button className="btn btn-o btn-sm" style={{marginLeft:'auto'}} onClick={()=>exp(r)}>Export</button>
+            <button className="btn btn-x btn-sm" onClick={()=>del(r.id)}>✕</button>
+          </div>
+        </div>
+      ))}
+    </div>
+    <button className="fab" onClick={()=>setShowNew(true)}>+</button>
+
+    {showNew&&<Modal title="Neue Strecke" onClose={()=>setShowNew(false)} onOk={create} okLabel="Erstellen">
+      <F label="Name"><input className="inp" value={form.name} onChange={e=>fv('name',e.target.value)} placeholder="München – Augsburg"/></F>
+      <F label="Beschreibung"><input className="inp" value={form.desc} onChange={e=>fv('desc',e.target.value)}/></F>
+      <div className="irow">
+        <F label="Start-km"><input className="inp" type="number" value={form.start} onChange={e=>fv('start',e.target.value)}/></F>
+        <F label="End-km"><input className="inp" type="number" value={form.end} onChange={e=>fv('end',e.target.value)}/></F>
+      </div>
+    </Modal>}
+
+    {showImp&&<Modal title="Von URL importieren" onClose={()=>setShowImp(false)} onOk={impUrl} okLabel="Laden">
+      <F label="Raw-URL (GitHub etc.)"><input className="inp" value={url} onChange={e=>setUrl(e.target.value)} placeholder="https://raw.githubusercontent.com/…"/></F>
+      {err&&<div style={{color:'var(--red)',fontSize:11,marginTop:3}}>{err}</div>}
+    </Modal>}
+  </>);
+}
+
+/* ──────────────────────────────
+   EDITOR
+────────────────────────────── */
+function Editor({routeId,go}){
+  const[route,setRoute]=useState(null);
+  const[showAdd,setShowAdd]=useState(false);
+  const[editing,setEditing]=useState(null);
+  const blank={km:'',type:'STATION',name:'',speed:'',speedEnd:'',gradient:'',notes:''};
+  const[form,setForm]=useState(blank);
+  const fv=(k,v)=>setForm(p=>({...p,[k]:v}));
+
+  useEffect(()=>{setRoute(DB.get().find(r=>r.id===routeId)||null);},[routeId]);
+
+  const save=objs=>{const all=DB.get().map(r=>r.id===routeId?{...r,objects:objs}:r);DB.set(all);setRoute(r=>({...r,objects:objs}));};
+
+  const saveObj=()=>{
+    const km=parseFloat(form.km.replace(',','.'));
+    if(isNaN(km))return;
+    const obj={id:editing?.id||Date.now(),km,type:form.type,name:form.name,
+      speed:parseInt(form.speed)||null,speedEnd:parseFloat(form.speedEnd)||null,
+      gradient:parseFloat(form.gradient.replace(',','.'))||null,notes:form.notes};
+    const objs=route.objects||[];
+    save((editing?objs.map(o=>o.id===editing.id?obj:o):[...objs,obj]).sort((a,b)=>a.km-b.km));
+    setShowAdd(false);
+  };
+
+  const openEdit=obj=>{
+    setEditing(obj);
+    setForm({km:String(obj.km),type:obj.type,name:obj.name||'',speed:String(obj.speed||''),
+      speedEnd:String(obj.speedEnd||''),gradient:String(obj.gradient??''),notes:obj.notes||''});
+    setShowAdd(true);
+  };
+
+  if(!route)return null;
+  const needSpeed=['SPEED','LA'].includes(form.type);
+
+  return(<>
+    <div className="topbar">
+      <button className="ic" onClick={()=>go('home')}>←</button>
+      <span style={{flex:1,fontWeight:600,fontSize:13}}>{route.name}</span>
+      <span className="topbar-label">EDITOR</span>
+    </div>
+    <div className="scroll" style={{paddingBottom:72}}>
+      {(route.objects||[]).length===0?<div className="empty"><div style={{fontSize:12}}>Noch keine Objekte — + drücken</div></div>
+      :(route.objects||[]).map(obj=>{
+        const t=T[obj.type]||T.STATION;
+        let det=[];
+        if(obj.speed)det.push(obj.speed+' km/h');
+        if(obj.speedEnd)det.push('bis km '+obj.speedEnd);
+        if(obj.gradient!=null)det.push((obj.gradient>0?'↗':'↘')+' '+Math.abs(obj.gradient)+'‰');
+        if(obj.notes)det.push(obj.notes);
+        return(
+          <div className="obj-r" key={obj.id}>
+            <span className="obj-km">{obj.km.toFixed(3)}</span>
+            <span className="obj-tag" style={{background:t.bg,color:t.clr}}>{t.s}</span>
+            <div className="obj-n">
+              <div className="obj-nl">{obj.name||t.l}</div>
+              {det.length>0&&<div className="obj-nd">{det.join(' · ')}</div>}
+            </div>
+            <div style={{display:'flex',gap:4,flexShrink:0}}>
+              <button className="ic" style={{fontSize:12}} onClick={()=>openEdit(obj)}>✎</button>
+              <button className="ic" style={{fontSize:12}} onClick={()=>save((route.objects||[]).filter(o=>o.id!==obj.id))}>✕</button>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+    <button className="fab" onClick={()=>{setEditing(null);setForm(blank);setShowAdd(true);}}>+</button>
+
+    {showAdd&&<Modal title={editing?'Bearbeiten':'Objekt hinzufügen'} onClose={()=>setShowAdd(false)} onOk={saveObj}>
+      <div className="irow">
+        <F label="km"><input className="inp" value={form.km} onChange={e=>fv('km',e.target.value)} inputMode="decimal" placeholder="12.345"/></F>
+        <F label="Typ"><select className="inp" value={form.type} onChange={e=>fv('type',e.target.value)}>
+          {Object.entries(T).map(([k,v])=><option key={k} value={k}>{v.l}</option>)}
+        </select></F>
+      </div>
+      <F label="Name"><input className="inp" value={form.name} onChange={e=>fv('name',e.target.value)} placeholder={form.type==='STATION'?'z. B. München Hbf':'Bezeichnung'}/></F>
+      {needSpeed&&<><F label="Geschwindigkeit km/h"><input className="inp" type="number" value={form.speed} onChange={e=>fv('speed',e.target.value)}/></F>
+        {form.type==='LA'&&<F label="La-Ende km"><input className="inp" value={form.speedEnd} onChange={e=>fv('speedEnd',e.target.value)} inputMode="decimal"/></F>}</>}
+      {form.type==='GRADE'&&<F label="‰ (negativ = Gefälle)"><input className="inp" value={form.gradient} onChange={e=>fv('gradient',e.target.value)} inputMode="decimal"/></F>}
+      <F label="Notizen"><input className="inp" value={form.notes} onChange={e=>fv('notes',e.target.value)}/></F>
+    </Modal>}
+  </>);
+}
+
+/* ──────────────────────────────
+   START-DIALOG
+────────────────────────────── */
+function StartDialog({routeId,go}){
+  const route=DB.get().find(r=>r.id===routeId);
+  const stations=(route?.objects||[]).filter(o=>o.type==='STATION');
+  const[served,setServed]=useState(()=>Object.fromEntries(stations.map(s=>[s.id,true])));
+  const[times,setTimes]=useState(()=>Object.fromEntries(stations.map(s=>[s.id,{arr:'',dep:''}])));
+  const[dep,setDep]=useState('');
+  const[mode,setMode]=useState('TIME');
+  const[avg,setAvg]=useState('80');
+
+  if(!route)return null;
+
+  const start=()=>{
+    const servedStops=stations.map(s=>({...s,isServed:!!served[s.id],
+      arrival:times[s.id]?.arr||'',departure:times[s.id]?.dep||''}));
+    go('drive',routeId,{
+      trip:{id:Date.now(),mode,departure:dep,avgSpeed:parseFloat(avg)||80,offset:0,startKm:route.startKm},
+      timetable:servedStops,route
+    });
+  };
+
+  return(<>
+    <div className="topbar">
+      <button className="ic" onClick={()=>go('home')}>←</button>
+      <span style={{flex:1,fontWeight:600,fontSize:13}}>{route.name}</span>
+      <span className="topbar-label">FAHRT STARTEN</span>
+    </div>
+    <div className="scroll" style={{paddingBottom:80}}>
+
+      <div style={{background:'var(--s1)',border:'1px solid var(--b1)',borderRadius:4,padding:13,marginBottom:12}}>
+        <div style={{fontFamily:'var(--mono)',fontSize:9,color:'var(--faint)',letterSpacing:1,textTransform:'uppercase',marginBottom:10}}>Grundeinstellungen</div>
+        <div className="irow">
+          <F label="Abfahrtszeit"><input className="inp" value={dep} onChange={e=>setDep(e.target.value)} placeholder="HH:MM"/></F>
+          <F label="Positionsberechnung"><select className="inp" value={mode} onChange={e=>setMode(e.target.value)}>
+            <option value="TIME">Zeitbasiert (Fahrplan)</option>
+            <option value="SPEED">Ø-Geschwindigkeit</option>
+          </select></F>
+        </div>
+        {mode==='SPEED'&&<F label="Ø-Geschwindigkeit km/h"><input className="inp" type="number" value={avg} onChange={e=>setAvg(e.target.value)}/></F>}
+      </div>
+
+      {stations.length>0&&<div style={{background:'var(--s1)',border:'1px solid var(--b1)',borderRadius:4,padding:13}}>
+        <div style={{fontFamily:'var(--mono)',fontSize:9,color:'var(--faint)',letterSpacing:1,textTransform:'uppercase',marginBottom:10}}>Halte ({stations.length} Bahnhöfe)</div>
+        {stations.map((s,i)=>(
+          <div key={s.id} style={{marginBottom:i<stations.length-1?11:0,paddingBottom:i<stations.length-1?11:0,borderBottom:i<stations.length-1?'1px solid var(--b1)':'none'}}>
+            <label className="chk">
+              <input type="checkbox" checked={!!served[s.id]} onChange={e=>setServed(p=>({...p,[s.id]:e.target.checked}))}/>
+              <span style={{fontWeight:600,fontSize:13}}>{s.name||'Bahnhof'}</span>
+              <span style={{fontFamily:'var(--mono)',fontSize:10,color:'var(--faint)',marginLeft:4}}>km {s.km.toFixed(3)}</span>
+            </label>
+            {served[s.id]&&mode==='TIME'&&<div className="irow" style={{marginTop:6,paddingLeft:21}}>
+              <F label="Ankunft"><input className="inp" value={times[s.id]?.arr||''} onChange={e=>setTimes(p=>({...p,[s.id]:{...p[s.id],arr:e.target.value}}))} placeholder="HH:MM"/></F>
+              <F label="Abfahrt"><input className="inp" value={times[s.id]?.dep||''} onChange={e=>setTimes(p=>({...p,[s.id]:{...p[s.id],dep:e.target.value}}))} placeholder="HH:MM"/></F>
+            </div>}
+          </div>
+        ))}
+      </div>}
+    </div>
+
+    <div style={{position:'fixed',bottom:0,left:0,right:0,padding:'10px 14px',background:'var(--s1)',borderTop:'1px solid var(--b1)'}}>
+      <button className="btn btn-p" style={{width:'100%',height:40,fontSize:14,letterSpacing:1}} onClick={start}>▶  FAHRT BEGINNEN</button>
+    </div>
+  </>);
+}
+
+/* ──────────────────────────────
+   BUCHFAHRPLAN-ANSICHT
+────────────────────────────── */
+function DriveView({routeId,tripData,go}){
+  const{route,trip:initTrip,timetable}=tripData;
+  const[trip,setTrip]=useState(initTrip);
+  const[time,setTime]=useState(initTrip.departure||'00:00');
+  const[running,setRunning]=useState(false);
+  const[autoScroll,setAutoScroll]=useState(true);
+  const[showOffset,setShowOffset]=useState(false);
+  const tickRef=useRef(null);
+  const scrollRef=useRef(null);
+
+  // Alle Items aufbauen: Objekte + Timetable zusammenführen
+  const items=useMemo(()=>{
+    const objs=[...(route.objects||[])];
+    timetable.forEach(s=>{const i=objs.findIndex(o=>o.id===s.id);if(i>=0)objs[i]={...objs[i],...s};});
+    return objs.sort((a,b)=>a.km-b.km);
+  },[route,timetable]);
+
+  const served=timetable.filter(s=>s.isServed);
+  const curKm=calcKm(time,trip,served);
+  const prog=Math.max(0,Math.min(1,(curKm-route.startKm)/(route.endKm-route.startKm)));
+
+  const nextStop=served.filter(s=>s.km>curKm).sort((a,b)=>a.km-b.km)[0];
+  const prevStop=served.filter(s=>s.km<=curKm).sort((a,b)=>b.km-a.km)[0];
+
+  useEffect(()=>{
+    if(running){tickRef.current=setInterval(()=>setTime(t=>fmtS(toS(t)+1)),1000);}
+    else clearInterval(tickRef.current);
+    return()=>clearInterval(tickRef.current);
+  },[running]);
+
+  useEffect(()=>{
+    if(!autoScroll||!scrollRef.current)return;
+    const idx=items.findLastIndex?items.findLastIndex(it=>it.km<=curKm):[...items].reverse().findIndex(it=>it.km<=curKm);
+    if(idx<0)return;
+    let top=0;
+    for(let i=0;i<idx;i++)top+=(items[i].type==='STATION'?STA_H:ROW_H);
+    scrollRef.current.scrollTo({top:top-scrollRef.current.clientHeight*.45,behavior:'smooth'});
+  },[curKm,autoScroll]);
+
+  const adjOff=d=>setTrip(t=>({...t,offset:(t.offset||0)+d}));
+
+  // Km-Skalen-Items
+  const kmItems=items.map(it=>({km:it.km,h:it.type==='STATION'?STA_H:ROW_H}));
+
+  return(
+    <div className="drive">
+      {/* HUD */}
+      <div className="hud">
+        <div className="hud-cell" style={{paddingLeft:10}}>
+          <button className="ic" style={{width:24,height:22,fontSize:12,marginBottom:3}} onClick={()=>{setRunning(false);go('home');}}>←</button>
+          <div className="hud-lbl">STRECKEN-KM</div>
+          <div className="hud-val">{curKm.toFixed(1)}</div>
+        </div>
+        <div className="hud-center">
+          {prevStop&&<div className="hud-prev">↑ {prevStop.name}</div>}
+          {nextStop?<>
+            <div className="hud-next-n">→ {nextStop.name}</div>
+            <div className="hud-next-d">
+              {nextStop.arrival&&'an '+nextStop.arrival}{nextStop.departure&&'  ab '+nextStop.departure}
+              {'  ·  '}{(nextStop.km-curKm).toFixed(1)} km
+            </div>
+          </>:<div style={{fontSize:11,color:'var(--faint)',fontFamily:'var(--mono)'}}>Kein weiterer Halt</div>}
+        </div>
+        <div className="hud-time-cell">
+          <div className="hud-lbl" style={{textAlign:'right'}}>INGAME-ZEIT</div>
+          <input className="hud-time-inp" value={time} onChange={e=>{setRunning(false);setTime(e.target.value);}}/>
+          <div style={{display:'flex',gap:4}}>
+            <button className="ic" style={{width:26,height:22,fontSize:11,color:autoScroll?'var(--green2)':'var(--faint)'}} onClick={()=>setAutoScroll(a=>!a)} title="Auto-Scroll">⊙</button>
+            <button className="ic" style={{width:26,height:22,fontSize:11,color:showOffset?'var(--accent)':'var(--faint)'}} onClick={()=>setShowOffset(s=>!s)}>⚙</button>
+          </div>
+        </div>
+      </div>
+
+      {/* Fortschritt */}
+      <div className="prog"><div className="prog-f" style={{width:prog*100+'%'}}/></div>
+
+      {/* Buchfahrplan-Streifen */}
+      <div className="bfp-wrap">
+
+        {/* km-Skala */}
+        <div className="km-col">
+          <div className="km-col-inner">
+            {kmItems.map((it,i)=>(
+              <div key={i} className="km-tick" style={{height:it.h,borderBottom:'1px solid var(--b1)'}}>
+                <span className={`km-n ${Math.abs(it.km-curKm)<.4?'act':it.km%1===0?'maj':''}`}>
+                  {it.km%1===0?it.km.toFixed(0):it.km.toFixed(1)}
+                </span>
+              </div>
+            ))}
+            <div style={{height:160}}/>
+          </div>
+        </div>
+
+        {/* Hauptstreifen */}
+        <div className="bfp-wrap" style={{overflow:'hidden'}}>
+          <div ref={scrollRef} style={{flex:1,overflowY:'auto'}}>
+            {items.map((item,i)=>{
+              const isSta=item.type==='STATION';
+              const isLeft=LEFT.includes(item.type);
+              const isRight=RIGHT.includes(item.type);
+              const tp=T[item.type]||T.STATION;
+              const passed=item.km<curKm-.15;
+              const isCur=Math.abs(item.km-curKm)<.25;
+              const h=isSta?STA_H:ROW_H;
+
+              return(
+                <div key={item.id||i} style={{display:'flex',height:h,
+                  borderBottom:`1px solid ${isSta?'var(--b2)':'var(--b1)'}`,
+                  background:isCur?'#1a2a1a':isSta?'#12121800':'transparent',
+                  position:'relative',alignItems:'center'}}>
+
+                  {/* Linke Spalte */}
+                  <div style={{width:78,flexShrink:0,display:'flex',alignItems:'center',justifyContent:'flex-end',paddingRight:6,height:'100%',borderRight:'1px solid var(--b1)'}}>
+                    {isLeft&&<div style={{textAlign:'right'}}>
+                      {item.type==='SPEED'&&<div className="sym-l" style={{color:'var(--yellow)'}}>{item.speed||'V'}<span style={{fontSize:8}}> km/h</span></div>}
+                      {item.type==='LA'&&<div className="sym-l" style={{color:'var(--red)'}}>La {item.speed||'?'}{item.speedEnd&&<span style={{fontSize:8}}><br/>bis {item.speedEnd}</span>}</div>}
+                      {item.type==='BUE'&&<div className="sym-l" style={{color:'var(--red)'}}>BÜ</div>}
+                      {item.name&&<div style={{fontFamily:'var(--mono)',fontSize:8,color:'var(--faint)',marginTop:1}}>{item.name}</div>}
+                    </div>}
+                  </div>
+
+                  {/* Gleis-Mitte */}
+                  <div style={{width:50,flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',position:'relative',height:'100%'}}>
+                    {/* Streckenlinie */}
+                    <div style={{position:'absolute',top:0,bottom:0,width:3,
+                      background:passed?'var(--s3)':isCur?'var(--green2)':'var(--b2)',
+                      left:'50%',transform:'translateX(-50%)',zIndex:0}}/>
+
+                    {/* Bahnhofssymbol */}
+                    {isSta&&<div style={{
+                      width:item.isServed?13:8,height:item.isServed?13:8,
+                      borderRadius:'50%',
+                      background:item.isServed?(passed?'var(--dim)':'var(--text)'):'var(--b2)',
+                      border:'2px solid #08080b',
+                      zIndex:2,position:'relative'}}/>}
+
+                    {/* V / La Querstrich */}
+                    {(item.type==='SPEED'||item.type==='LA')&&
+                      <div style={{position:'absolute',top:'50%',left:0,right:0,height:2,
+                        background:item.type==='LA'?'var(--red)':'var(--yellow)',opacity:.7,zIndex:1}}/>}
+
+                    {/* BÜ-Kreuz */}
+                    {item.type==='BUE'&&<>
+                      <div style={{position:'absolute',top:'50%',left:0,right:0,height:1,background:'var(--red)',opacity:.6,zIndex:1}}/>
+                      <div style={{position:'absolute',top:0,bottom:0,left:'50%',width:1,background:'var(--red)',opacity:.6,zIndex:1,transform:'translateX(-50%)'}}/>
+                    </>}
+
+                    {/* Positionsraute */}
+                    {isCur&&<>
+                      <div className="pos-diamond"/>
+                      <div className="pos-arm-l"/>
+                      <div className="pos-arm-r"/>
+                    </>}
+                  </div>
+
+                  {/* Rechte Spalte */}
+                  <div style={{flex:1,paddingLeft:7,height:'100%',display:'flex',alignItems:'center',overflow:'hidden',borderLeft:'1px solid var(--b1)'}}>
+                    {isSta&&item.isServed?(
+                      <div>
+                        <div className="bf-name" style={{color:passed?'var(--faint)':'var(--text)'}}>{item.name||'Bahnhof'}</div>
+                        <div className="bf-times">
+                          {item.arrival&&'an '+item.arrival}{item.arrival&&item.departure&&'  '}{item.departure&&'ab '+item.departure}
+                        </div>
+                        {item.track&&<div className="bf-gleis">Gl. {item.track}</div>}
+                      </div>
+                    ):isSta&&!item.isServed?(
+                      <div style={{fontFamily:'var(--mono)',fontSize:10,color:'var(--faint)'}}>{item.name} <span style={{fontSize:9}}>(Durchfahrt)</span></div>
+                    ):isRight?(
+                      <div className="sym-r" style={{color:tp.clr}}>
+                        {item.type==='SIGNAL'&&(item.name||'Signal')}
+                        {item.type==='TU_START'&&`⊢ Tunnel ${item.name||''}`}
+                        {item.type==='TU_END'&&'Tunnel ⊣'}
+                        {item.type==='GRADE'&&item.gradient!=null&&`${item.gradient>0?'↗':'↘'} ${Math.abs(item.gradient)}‰${item.name?' '+item.name:''}`}
+                      </div>
+                    ):null}
+                    {item.notes&&!isSta&&<div style={{fontFamily:'var(--mono)',fontSize:9,color:'var(--faint)',marginLeft:4}}>{item.notes}</div>}
+                  </div>
+                </div>
+              );
+            })}
+            {/* Streckenende */}
+            <div style={{height:120,display:'flex',alignItems:'flex-start',paddingTop:16,justifyContent:'center'}}>
+              <span style={{fontFamily:'var(--mono)',fontSize:9,color:'var(--faint)',letterSpacing:2}}>══ STRECKENENDE km {route.endKm} ══</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Fußzeile */}
+      <div className="drive-foot">
+        <button className={`btn btn-sm ${running?'btn-x':'btn-p'}`} style={{letterSpacing:.5}} onClick={()=>setRunning(r=>!r)}>
+          {running?'⏹ STOP':'▶ START'}
+        </button>
+
+        {showOffset&&<div className="offset-wrap">
+          <span style={{fontFamily:'var(--mono)',fontSize:9,color:'var(--faint)'}}>km±</span>
+          <span className="ov-val">{(trip.offset||0)>=0?'+':''}{(trip.offset||0).toFixed(1)}</span>
+          {[-1,-.1,.1,1].map(d=>(
+            <button key={d} className="ob" onClick={()=>adjOff(d)}>{d>0?'+':''}{d}</button>
+          ))}
+          <button className="ob" onClick={()=>setTrip(t=>({...t,offset:0}))}>↺</button>
+        </div>}
+
+        <span style={{fontFamily:'var(--mono)',fontSize:9,color:'var(--faint)',marginLeft:'auto'}}>
+          {route.name} · {Math.max(0,route.endKm-curKm).toFixed(1)} km verbleibend
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/* ──────────────────────────────
+   ROOT
+────────────────────────────── */
+function App(){
+  const[screen,setScreen]=useState('home');
+  const[routeId,setRouteId]=useState(null);
+  const[tripData,setTripData]=useState(null);
+  const[showTut,setShowTut]=useState(!DB.tut());
+
+  const go=(s,rid,extra)=>{
+    setScreen(s);
+    if(rid!==undefined)setRouteId(rid);
+    if(extra!==undefined)setTripData(extra);
+  };
+
+  if(screen==='drive'&&tripData) return <DriveView routeId={routeId} tripData={tripData} go={go}/>;
+
+  return(
+    <div className="app">
+      {screen==='home'   &&<Home go={go}/>}
+      {screen==='editor' &&<Editor routeId={routeId} go={go}/>}
+      {screen==='start'  &&<StartDialog routeId={routeId} go={go}/>}
+      {showTut&&<Tutorial onDone={()=>setShowTut(false)}/>}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
