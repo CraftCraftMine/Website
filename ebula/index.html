@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>CCMN™ Web EBuLa</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+:root{
+  --bg:#09090d; --s1:#111116; --s2:#17171e; --s3:#1d1d26;
+  --b1:#25253280; --b2:#323240; --b3:#44445560;
+  --text:#c4c4d6; --dim:#686880; --faint:#32323f;
+  --pri:#3a7ec4; --pri2:#1e4f88; --priL:#5090d4;
+  --acc:#b89030; --green:#287840; --green2:#38b060;
+  --red:#a82828; --yel:#a89020;
+  --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body,#root{height:100%;overflow:hidden;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;}
+::-webkit-scrollbar{width:3px;} ::-webkit-scrollbar-thumb{background:var(--b2);}
+
+.app{display:flex;flex-direction:column;height:100dvh;}
+.page{display:flex;flex-direction:column;flex:1;overflow:hidden;min-height:0;}
+.bar{display:flex;align-items:center;gap:9px;padding:0 13px;height:44px;background:var(--s1);border-bottom:1px solid var(--b2);flex-shrink:0;}
+.brand{font-family:var(--mono);font-size:11px;letter-spacing:3px;color:var(--pri);flex:1;}
+.bar-lbl{font-family:var(--mono);font-size:9px;color:var(--faint);letter-spacing:1px;text-transform:uppercase;}
+.scroll{flex:1;overflow-y:auto;padding:12px 12px 0;}
+
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:0 12px;height:30px;border-radius:3px;border:none;cursor:pointer;font-family:var(--sans);font-size:12px;font-weight:500;white-space:nowrap;transition:filter .1s;}
+.bp{background:var(--pri2);color:#b8d4f0;border:1px solid #3a7ec440;} .bp:hover{filter:brightness(1.25);}
+.bo{background:transparent;color:var(--dim);border:1px solid var(--b2);} .bo:hover{background:var(--s3);color:var(--text);}
+.bx{background:transparent;color:var(--red);border:1px solid #a8282822;} .bx:hover{background:#a8282815;}
+.bsm{height:26px;padding:0 9px;font-size:11px;}
+.ic{width:28px;height:28px;border-radius:3px;background:transparent;border:1px solid var(--b2);cursor:pointer;color:var(--dim);font-size:13px;display:inline-flex;align-items:center;justify-content:center;transition:all .1s;}
+.ic:hover{background:var(--s3);color:var(--text);}
+.fab{position:fixed;bottom:72px;right:14px;width:44px;height:44px;border-radius:50%;background:var(--pri2);border:1px solid var(--pri)44;cursor:pointer;font-size:20px;color:#b8d4f0;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 18px #1e4f8840;z-index:41;}
+
+/* ── Form ── */
+.field{margin-bottom:10px;}
+.field>label{display:block;font-family:var(--mono);font-size:9px;color:var(--dim);margin-bottom:4px;text-transform:uppercase;letter-spacing:.8px;}
+.inp{width:100%;background:var(--s2);border:1px solid var(--b2);border-radius:3px;padding:7px 9px;color:var(--text);font-family:var(--sans);font-size:13px;outline:none;transition:border .1s;}
+.inp:focus{border-color:var(--pri2);}
+select.inp{cursor:pointer;}
+.irow{display:flex;gap:8px;} .irow .field{flex:1;}
+.chk{display:flex;align-items:center;gap:7px;cursor:pointer;font-size:13px;padding:3px 0;}
+.chk input{width:14px;height:14px;accent-color:var(--pri);cursor:pointer;}
+
+/* ── Modal ── */
+.ov{position:fixed;inset:0;background:#000000a8;z-index:300;display:flex;align-items:flex-end;}
+.sheet{background:var(--s1);border:1px solid var(--b2);border-top:2px solid var(--pri2);border-radius:12px 12px 0 0;width:100%;max-height:92dvh;overflow-y:auto;padding:17px 14px;}
+.sheet-h{font-size:15px;font-weight:600;margin-bottom:13px;}
+.sheet-f{display:flex;gap:7px;justify-content:flex-end;margin-top:13px;padding-top:10px;border-top:1px solid var(--b2);}
+
+/* ── Cards ── */
+.rcard{background:var(--s1);border:1px solid var(--b2);border-radius:4px;margin-bottom:9px;}
+.rcard-h{padding:11px 13px;}
+.rcard-n{font-weight:600;font-size:14px;}
+.rcard-m{font-family:var(--mono);font-size:10px;color:var(--faint);margin-top:3px;}
+.rcard-a{display:flex;gap:6px;padding:7px 13px;background:var(--s2);border-top:1px solid var(--b2);flex-wrap:wrap;align-items:center;}
+
+/* ── Editor rows ── */
+.objr{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--b2);}
+.okm{font-family:var(--mono);font-size:10px;color:var(--dim);width:50px;flex-shrink:0;}
+.otag{padding:2px 5px;border-radius:2px;font-family:var(--mono);font-size:10px;font-weight:600;flex-shrink:0;}
+.empty{display:flex;flex-direction:column;align-items:center;padding:48px 20px;gap:8px;color:var(--faint);text-align:center;}
+
+/* ── Footer ── */
+.footer{background:var(--s1);border-top:1px solid var(--b2);padding:10px 13px;flex-shrink:0;}
+.footer-logo{font-family:var(--mono);font-size:9px;color:var(--pri);letter-spacing:2px;margin-bottom:6px;}
+.footer-txt{font-size:10px;color:var(--dim);line-height:1.65;}
+
+/* ═══════════════════════════════
+   DRIVE / EBULA VIEW
+═══════════════════════════════ */
+.drive{display:flex;flex-direction:column;height:100dvh;background:#07070b;}
+.hud{display:flex;align-items:stretch;background:var(--s1);border-bottom:2px solid var(--b2);flex-shrink:0;}
+.hcell{display:flex;flex-direction:column;justify-content:center;padding:7px 11px;border-right:1px solid var(--b2);}
+.hlbl{font-family:var(--mono);font-size:8px;color:var(--faint);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:1px;}
+.hval{font-family:var(--mono);font-size:24px;font-weight:600;color:var(--pri);line-height:1;}
+.hcenter{flex:1;display:flex;flex-direction:column;justify-content:center;padding:5px 10px;text-align:center;}
+.hnext{font-size:13px;font-weight:600;}
+.hnextd{font-family:var(--mono);font-size:10px;color:var(--acc);}
+.hprev{font-family:var(--mono);font-size:9px;color:var(--faint);}
+.htcell{display:flex;flex-direction:column;justify-content:center;align-items:flex-end;padding:6px 10px;gap:4px;}
+.htime{font-family:var(--mono);font-size:18px;font-weight:600;color:var(--text);background:var(--s2);border:1px solid var(--b2);border-radius:3px;width:72px;text-align:center;padding:3px 4px;outline:none;}
+.prog{height:2px;background:var(--s3);flex-shrink:0;}
+.progf{height:100%;background:linear-gradient(90deg,var(--pri2),var(--pri));transition:width .6s linear;}
+
+/* BFP Layout */
+.bfp{flex:1;display:flex;overflow:hidden;}
+.kmcol{width:38px;flex-shrink:0;background:#06060a;border-right:1px solid var(--b2);overflow:hidden;}
+.kmcol-in{display:flex;flex-direction:column;}
+.kmtick{display:flex;align-items:center;justify-content:flex-end;padding-right:3px;border-bottom:1px solid var(--b2);}
+.kmn{font-family:var(--mono);font-size:8px;color:var(--faint);}
+.kmn.maj{color:var(--dim);} .kmn.act{color:var(--pri);}
+
+.bscroll{flex:1;overflow-y:auto;}
+.brow{display:flex;position:relative;}
+.bleft{width:74px;flex-shrink:0;display:flex;align-items:center;justify-content:flex-end;padding-right:5px;border-right:1px solid var(--b2);}
+.bmid{width:46px;flex-shrink:0;display:flex;align-items:center;justify-content:center;position:relative;}
+.bright{flex:1;display:flex;align-items:center;padding-left:6px;border-left:1px solid var(--b2);overflow:hidden;}
+.gleis{position:absolute;top:0;bottom:0;width:3px;left:50%;transform:translateX(-50%);z-index:0;}
+.bfsym{border-radius:50%;border:2px solid #07070b;z-index:2;position:relative;flex-shrink:0;}
+.pdiam{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(45deg);width:12px;height:12px;background:var(--green2);border:2px solid #07070b;z-index:10;}
+.parm{position:absolute;top:50%;height:1px;background:var(--green2);opacity:.2;z-index:9;}
+.bfname{font-family:var(--mono);font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.bftimes{font-family:var(--mono);font-size:10px;color:var(--acc);}
+.siml{font-family:var(--mono);font-size:10px;font-weight:600;text-align:right;line-height:1.3;}
+.simr{font-family:var(--mono);font-size:10px;line-height:1.3;}
+.dfoot{display:flex;align-items:center;gap:7px;padding:7px 11px;background:var(--s1);border-top:1px solid var(--b2);flex-shrink:0;flex-wrap:wrap;}
+.offwrap{display:flex;align-items:center;gap:3px;background:var(--s2);border:1px solid var(--b2);border-radius:3px;padding:3px 5px;}
+.ob{background:var(--s3);border:1px solid var(--b2);border-radius:2px;color:var(--text);font-family:var(--mono);font-size:10px;padding:2px 5px;cursor:pointer;}
+
+/* ═══════════════════════════════
+   TUTORIAL SPOTLIGHT
+═══════════════════════════════ */
+.tut-backdrop{position:fixed;inset:0;z-index:800;pointer-events:none;}
+.tut-mask{position:fixed;inset:0;z-index:800;pointer-events:all;}
+/* Spotlight als SVG-Overlay im JS */
+.tut-card{
+  position:fixed;z-index:820;
+  background:var(--s1);
+  border:1px solid var(--pri2);
+  border-top:2px solid var(--pri);
+  border-radius:8px;padding:15px 15px;
+  width:calc(100% - 24px);max-width:380px;
+  box-shadow:0 8px 32px #00000060;
+}
+.tut-n{font-family:var(--mono);font-size:9px;color:var(--dim);margin-bottom:3px;text-transform:uppercase;letter-spacing:1px;}
+.tut-title{font-size:14px;font-weight:600;margin-bottom:7px;}
+.tut-txt{font-size:12px;color:var(--dim);line-height:1.65;margin-bottom:10px;}
+.tut-bars{display:flex;gap:3px;margin-bottom:10px;}
+.tut-bar{height:2px;flex:1;border-radius:1px;background:var(--b2);}
+.tut-bar.on{background:var(--pri);}
+.tut-nav{display:flex;gap:6px;justify-content:flex-end;align-items:center;}
+/* Ring-Animation auf dem gespotlighteten Element */
+@keyframes tut-ring{0%,100%{box-shadow:0 0 0 3px var(--pri),0 0 0 9999px #000000b0;}50%{box-shadow:0 0 0 4px var(--priL),0 0 0 9999px #000000b0,0 0 16px #3a7ec450;}}
+.tut-spotlight{
+  position:fixed;z-index:810;
+  border-radius:5px;
+  box-shadow:0 0 0 3px var(--pri),0 0 0 9999px #000000b0;
+  animation:tut-ring 1.4s infinite;
+  pointer-events:none;
+}
+@keyframes tut-bounce{from{transform:translateY(0);}to{transform:translateY(-5px);}}
+.tut-arrow{position:fixed;z-index:821;font-size:24px;animation:tut-bounce .8s infinite alternate;pointer-events:none;color:var(--priL);}
+</style>
+</head>
+<body><div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef, useMemo, useCallback } = React;
+
+/* ── Typen ── */
+const T = {
+  STATION:{l:'Bahnhof / Hp',    s:'Bf', side:'track',clr:'#a0a8c0',bg:'#191b2c'},
+  SPEED:  {l:'Geschwindigkeit', s:'V',  side:'left', clr:'#b09018',bg:'#221e08'},
+  LA:     {l:'Langsamfahrstelle',s:'La',side:'left', clr:'#a02020',bg:'#1e0c0c'},
+  BUE:    {l:'Bahnübergang',    s:'BÜ',side:'left', clr:'#a02020',bg:'#1e0c0c'},
+  SIGNAL: {l:'Signal',          s:'Sig',side:'right',clr:'#4a5060',bg:'#0c0e12'},
+  TU_S:   {l:'Tunnelanfang',    s:'Tu▸',side:'right',clr:'#3c4450',bg:'#0c0e12'},
+  TU_E:   {l:'Tunnelende',      s:'▸Tu',side:'right',clr:'#3c4450',bg:'#0c0e12'},
+  GRADE:  {l:'Steigung/Gefälle',s:'‰',  side:'right',clr:'#247040',bg:'#08120a'},
+};
+const LEFT=['SPEED','LA','BUE'], RIGHT=['SIGNAL','TU_S','TU_E','GRADE'];
+const ROW_H=30, STA_H=52;
+
+/* ── Storage ── */
+const DB={
+  get:()=>{try{return JSON.parse(localStorage.getItem('ccmn_e4')||'[]');}catch{return[];}},
+  set:d=>localStorage.setItem('ccmn_e4',JSON.stringify(d)),
+  tutDone:()=>localStorage.getItem('ccmn_tut4')==='1',
+  markTut:()=>localStorage.setItem('ccmn_tut4','1'),
+  resetTut:()=>localStorage.removeItem('ccmn_tut4'),
+};
+
+/* ── Zeit-Utils ── */
+const toS=t=>{if(!t||!t.includes(':'))return null;const[h,m]=t.split(':').map(Number);return h*3600+m*60;};
+const fmtS=s=>{s=((s%86400)+86400)%86400;return`${String(Math.floor(s/3600)).padStart(2,'0')}:${String(Math.floor((s%3600)/60)).padStart(2,'0')}`;};
+const tdiff=(a,b)=>{const d=toS(b)-toS(a);return d<0?d+86400:d;};
+
+function calcKm(timeStr, trip, servedStops){
+  const off=trip.offset||0;
+  const sKm=(trip.startKm||0)+off;
+  if(!timeStr||!trip)return sKm;
+  const cs=toS(timeStr);
+  if(cs===null)return sKm;
+
+  if(trip.mode==='SPEED'){
+    const dep=toS(trip.departure);
+    if(dep===null)return sKm;
+    const hrs=tdiff(trip.departure,timeStr)/3600;
+    return Math.max(sKm,hrs*(trip.avgSpeed||80)+sKm);
+  }
+
+  // TIME mode: Interpolation
+  const anchors=servedStops
+    .filter(s=>s.departure||s.arrival)
+    .map(s=>({km:s.km,sec:toS(s.departure||s.arrival)}))
+    .filter(a=>a.sec!==null)
+    .sort((a,b)=>a.km-b.km);
+  if(!anchors.length)return sKm;
+  if(cs<=anchors[0].sec)return anchors[0].km+off;
+  if(cs>=anchors[anchors.length-1].sec)return anchors[anchors.length-1].km+off;
+  for(let i=0;i<anchors.length-1;i++){
+    let[as,bs,s_]=[anchors[i].sec,anchors[i+1].sec,cs];
+    if(bs<as)bs+=86400; if(s_<as)s_+=86400;
+    if(s_>=as&&s_<=bs)
+      return anchors[i].km+(anchors[i+1].km-anchors[i].km)*(s_-as)/(bs-as)+off;
+  }
+  return anchors[anchors.length-1].km+off;
+}
+
+/* ── Footer ── */
+function Footer(){
+  return(
+    <div className="footer">
+      <div className="footer-logo">CCMN™ WEB EBULA</div>
+      <div className="footer-txt">
+        <strong style={{color:'var(--text)'}}>Hobby-Projekt – Nicht kommerziell</strong><br/>
+        Diese Website und das CraftCraftMine Netzwerk (CCMN™) sind ein privates, schulisches Projekt
+        von Schülern für Schüler. Es besteht keinerlei Absicht auf Gewinnerzielung oder gewerbliche Nutzung.<br/>
+        © 2026 CraftCraftMine Netzwerk · CCMN™ = CraftCraftMine Netzwerk™
+      </div>
+    </div>
+  );
+}
+
+/* ── Modal ── */
+function Modal({title,onClose,onOk,okLabel='Speichern',children}){
+  return(
+    <div className="ov" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="sheet">
+        <div className="sheet-h">{title}</div>
+        {children}
+        <div className="sheet-f">
+          <button className="btn bo" onClick={onClose}>Abbrechen</button>
+          {onOk&&<button className="btn bp" onClick={onOk}>{okLabel}</button>}
+        </div>
+      </div>
+    </div>
+  );
+}
+const F=({label,children})=><div className="field"><label>{label}</label>{children}</div>;
+
+/* ═══════════════════════════════════════════
+   TUTORIAL SYSTEM
+   10 Schritte, echter Spotlight auf DOM-Elemente
+   Manche Schritte warten auf echte Interaktion
+═══════════════════════════════════════════ */
+const DEMO_ROUTE_ID = '__demo__';
+
+const STEPS=[
+  // 0
+  {title:'Willkommen bei CCMN™ Web EBuLa!',
+   txt:'Diese App simuliert einen elektronischen Buchfahrplan. Ich führe dich in wenigen Schritten durch alle Funktionen — mit einer echten Demo-Strecke.',
+   target:null,arrow:null,action:'Los gehts'},
+  // 1
+  {title:'Neue Strecke anlegen',
+   txt:'Tippe auf den + Button unten rechts um eine neue Strecke zu erstellen.',
+   target:'fab-btn',arrow:'up-right',action:null,waitFor:'modal-open'},
+  // 2
+  {title:'Name & Kilometer eintragen',
+   txt:'Gib der Strecke einen Namen und die Start- und End-Kilometer ein. Für diese Demo ist alles schon vorausgefüllt.',
+   target:'new-route-sheet',arrow:null,action:'Weiter'},
+  // 3
+  {title:'Strecke speichern',
+   txt:'Tippe auf „Erstellen" um die Strecke zu speichern.',
+   target:'create-btn',arrow:'up',action:null,waitFor:'modal-close'},
+  // 4
+  {title:'Deine Strecke',
+   txt:'Super! Die Strecke erscheint jetzt hier. Tippe auf „Editor" um Objekte einzutragen.',
+   target:'first-editor-btn',arrow:'down',action:null,waitFor:'screen-editor'},
+  // 5
+  {title:'Objekte eintragen',
+   txt:'Hier trägst du alles ein: Bahnhöfe, Geschwindigkeiten, La, BÜ, Signale, Tunnel, Steigungen. Tippe auf + um ein Objekt hinzuzufügen.',
+   target:'fab-btn',arrow:'up-right',action:null,waitFor:'modal-open'},
+  // 6
+  {title:'Bahnhof anlegen',
+   txt:'Der Typ ist bereits auf „Bahnhof" gesetzt. Gib km-Position und den Bahnhofsnamen ein, dann speichern.',
+   target:'add-obj-sheet',arrow:null,action:'Weiter'},
+  // 7
+  {title:'Zurück zur Streckenübersicht',
+   txt:'Objekt gespeichert! Für die Demo kommen wir jetzt direkt zur Fahrtansicht. Tippe auf ← um zurückzugehen.',
+   target:'back-btn',arrow:'down',action:null,waitFor:'screen-home'},
+  // 8
+  {title:'Fahrt starten',
+   txt:'Tippe auf „Fahrt starten" um die EBuLa-Ansicht zu öffnen.',
+   target:'first-start-btn',arrow:'down',action:null,waitFor:'screen-start'},
+  // 9
+  {title:'Abfahrtszeit & Halte',
+   txt:'Trage deine Ingame-Abfahrtszeit ein und wähle die Halte. Für die Demo ist alles vorausgefüllt.',
+   target:'start-sheet',arrow:null,action:'Weiter'},
+  // 10
+  {title:'Fahrt beginnen',
+   txt:'Tippe auf „FAHRT BEGINNEN" um die EBuLa-Ansicht zu starten.',
+   target:'start-go-btn',arrow:'up',action:null,waitFor:'screen-drive'},
+  // 11
+  {title:'Die EBuLa-Ansicht läuft!',
+   txt:'Die Strecke scrollt automatisch, die grüne Raute zeigt deine Position. Oben siehst du km, nächsten Halt und Ingame-Zeit. Mit START läuft die Zeit automatisch. Du kannst jetzt das Tutorial beenden.',
+   target:'drive-foot',arrow:'up',action:'Tutorial beenden'},
+];
+
+function TutorialSpotlight({targetId, cardRef}){
+  const [rect, setRect]=useState(null);
+  useEffect(()=>{
+    if(!targetId){setRect(null);return;}
+    const update=()=>{
+      const el=document.getElementById(targetId);
+      if(el){
+        const r=el.getBoundingClientRect();
+        setRect({top:r.top-5,left:r.left-5,width:r.width+10,height:r.height+10});
+      } else setRect(null);
+    };
+    update();
+    const t=setInterval(update,200);
+    return()=>clearInterval(t);
+  },[targetId]);
+
+  if(!rect)return null;
+  return <div className="tut-spotlight" style={{top:rect.top,left:rect.left,width:rect.width,height:rect.height}}/>;
+}
+
+function Tutorial({step,onNext,onSkip,totalSteps,waitingFor}){
+  const s=STEPS[step];
+  const cardRef=useRef(null);
+  const [cardPos,setCardPos]=useState({bottom:20});
+
+  // Karten-Position relativ zum Spotlight
+  useEffect(()=>{
+    if(!s.target){setCardPos({bottom:20,left:'50%',transform:'translateX(-50%)'});return;}
+    const update=()=>{
+      const el=document.getElementById(s.target);
+      if(!el){setCardPos({bottom:20,left:'50%',transform:'translateX(-50%)'});return;}
+      const r=el.getBoundingClientRect();
+      const cardH=180;
+      const wh=window.innerHeight;
+      if(r.top > wh/2){
+        // Element ist unten → Karte oben davon
+        setCardPos({bottom:wh-r.top+12,left:'50%',transform:'translateX(-50%)'});
+      } else {
+        // Element ist oben → Karte unten davon
+        const top=r.bottom+12;
+        setCardPos({top:Math.min(top,wh-cardH-10),left:'50%',transform:'translateX(-50%)'});
+      }
+    };
+    update();
+  },[step,s.target]);
+
+  // Pfeil
+  let arrow=null;
+  if(s.arrow&&s.target){
+    const el=document.getElementById(s.target);
+    if(el){
+      const r=el.getBoundingClientRect();
+      if(s.arrow==='up-right') arrow={bottom:window.innerHeight-r.top+5,right:window.innerWidth-r.right-5};
+      if(s.arrow==='up')       arrow={bottom:window.innerHeight-r.top+5,left:r.left+r.width/2-12};
+      if(s.arrow==='down')     arrow={top:r.bottom+5,left:r.left+r.width/2-12};
+    }
+  }
+
+  return(
+    <>
+      {/* Backdrop – nur klickbar wenn kein waitFor */}
+      {!s.waitFor&&<div style={{position:'fixed',inset:0,zIndex:809,pointerEvents:'none'}}/>}
+      {s.target&&<TutorialSpotlight targetId={s.target}/>}
+
+      {/* Pfeil */}
+      {arrow&&<div className="tut-arrow" style={{...arrow}}>↓</div>}
+
+      {/* Karte */}
+      <div className="tut-card" ref={cardRef} style={{...cardPos}}>
+        <div className="tut-n">Schritt {step+1} / {totalSteps}</div>
+        <div className="tut-title">{s.title}</div>
+        <div className="tut-txt">{s.txt}</div>
+        <div className="tut-bars">
+          {Array.from({length:totalSteps},(_,i)=>(
+            <div key={i} className={`tut-bar ${i<=step?'on':''}`}/>
+          ))}
+        </div>
+        <div className="tut-nav">
+          <button className="btn bo bsm" onClick={onSkip}>Überspringen</button>
+          {s.action&&<button className="btn bp bsm" onClick={onNext}>{s.action}</button>}
+          {s.waitFor&&!s.action&&(
+            <span style={{fontFamily:'var(--mono)',fontSize:10,color:'var(--dim)'}}>
+              {s.arrow?'↑ Tippe das markierte Element':'Interagiere mit dem markierten Bereich'}
+            </span>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
+
+/* ════════════════════════════
+   HOME
+════════════════════════════ */
+function Home({go,onTutEvent,tutStep,isTutActive}){
+  const[routes,setRoutes]=useState(DB.get());
+  const[showNew,setShowNew]=useState(false);
+  const[showMenu,setShowMenu]=useState(false);
+  const[showImp,setShowImp]=useState(false);
+  const[form,setForm]=useState({name:'Demo: Hamburg–Harburg',desc:'',start:'0',end:'15'});
+  const[url,setUrl]=useState('');
+  const rf=()=>setRoutes(DB.get());
+  const fv=(k,v)=>setForm(p=>({...p,[k]:v}));
+
+  // Tutorial: Wenn Modal öffnet/schließt → Event
+  const handleNewOpen=()=>{
+    setShowNew(true);
+    if(isTutActive)onTutEvent('modal-open');
+  };
+  const handleCreate=()=>{
+    if(!form.name.trim())return;
+    const r={id:Date.now(),name:form.name.trim(),desc:form.desc.trim(),
+      startKm:parseFloat(form.start)||0,endKm:parseFloat(form.end)||15,objects:[]};
+    DB.set([...DB.get(),r]); rf(); setShowNew(false);
+    setForm({name:'Demo: Hamburg–Harburg',desc:'',start:'0',end:'15'});
+    if(isTutActive)onTutEvent('modal-close');
+  };
+  const handleCreateCancel=()=>{setShowNew(false);};
+
+  const del=id=>{if(!confirm('Strecke löschen?'))return;DB.set(DB.get().filter(r=>r.id!==id));rf();};
+  const exp=r=>{const a=document.createElement('a');a.href='data:application/json,'+encodeURIComponent(JSON.stringify(r,null,2));a.download=r.name.replace(/\s+/g,'-')+'.json';a.click();};
+  const impFile=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=ev=>{try{const d=JSON.parse(ev.target.result);d.id=Date.now();DB.set([...DB.get(),d]);rf();}catch{alert('Ungültige Datei');}};rd.readAsText(f);};
+
+  return(
+    <div className="page">
+      <div className="bar">
+        <span className="brand">CCMN™ EBULA</span>
+        <button className="ic" style={{fontSize:16}} onClick={()=>setShowMenu(m=>!m)}>☰</button>
+      </div>
+      {showMenu&&(
+        <div style={{background:'var(--s1)',borderBottom:'1px solid var(--b2)',padding:'8px 12px',display:'flex',gap:7,flexWrap:'wrap'}}>
+          <label className="btn bo bsm" style={{cursor:'pointer'}}>Import <input type="file" accept=".json" style={{display:'none'}} onChange={impFile}/></label>
+          <button className="btn bo bsm" onClick={()=>{setShowImp(true);setShowMenu(false);}}>URL importieren</button>
+          <button className="btn bo bsm" onClick={()=>{DB.resetTut();setShowMenu(false);onTutEvent('restart');}}>Tutorial starten</button>
+        </div>
+      )}
+      <div className="scroll" style={{paddingBottom:8}}>
+        {routes.length===0?(
+          <div className="empty">
+            <div style={{fontSize:13,fontWeight:600}}>Keine Strecken</div>
+            <div style={{fontSize:11}}>+ tippen um eine neue Strecke anzulegen</div>
+          </div>
+        ):routes.map((r,i)=>(
+          <div className="rcard" key={r.id}>
+            <div className="rcard-h">
+              <div className="rcard-n">{r.name}</div>
+              {r.desc&&<div style={{fontSize:11,color:'var(--dim)',marginTop:1}}>{r.desc}</div>}
+              <div className="rcard-m">km {r.startKm.toFixed(1)}–{r.endKm.toFixed(1)} · {(r.objects||[]).length} Obj. · {(r.objects||[]).filter(o=>o.type==='STATION').length} Bf.</div>
+            </div>
+            <div className="rcard-a">
+              <button className="btn bo bsm" id={i===0?'first-editor-btn':undefined}
+                onClick={()=>{go('editor',r.id);if(isTutActive)onTutEvent('screen-editor');}}>Editor</button>
+              <button className="btn bp bsm" id={i===0?'first-start-btn':undefined}
+                onClick={()=>{go('start',r.id);if(isTutActive)onTutEvent('screen-start');}}>Fahrt starten</button>
+              <button className="btn bo bsm" style={{marginLeft:'auto'}} onClick={()=>exp(r)}>Export</button>
+              <button className="btn bx bsm" onClick={()=>del(r.id)}>✕</button>
+            </div>
+          </div>
+        ))}
+      </div>
+      <Footer/>
+      <button className="fab" id="fab-btn" onClick={handleNewOpen}>+</button>
+
+      {showNew&&(
+        <div className="ov" onClick={e=>e.target===e.currentTarget&&handleCreateCancel()}>
+          <div className="sheet" id="new-route-sheet">
+            <div className="sheet-h">Neue Strecke</div>
+            <F label="Name"><input className="inp" value={form.name} onChange={e=>fv('name',e.target.value)} placeholder="z. B. München – Augsburg"/></F>
+            <F label="Beschreibung"><input className="inp" value={form.desc} onChange={e=>fv('desc',e.target.value)}/></F>
+            <div className="irow">
+              <F label="Start-km"><input className="inp" type="number" value={form.start} onChange={e=>fv('start',e.target.value)}/></F>
+              <F label="End-km"><input className="inp" type="number" value={form.end} onChange={e=>fv('end',e.target.value)}/></F>
+            </div>
+            <div className="sheet-f">
+              <button className="btn bo" onClick={handleCreateCancel}>Abbrechen</button>
+              <button className="btn bp" id="create-btn" onClick={handleCreate}>Erstellen</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showImp&&<Modal title="Von URL importieren" onClose={()=>setShowImp(false)}
+          onOk={async()=>{try{const res=await fetch(url);const r=await res.json();r.id=Date.now();DB.set([...DB.get(),r]);rf();setShowImp(false);}catch(e){alert('Fehler: '+e.message);}}} okLabel="Laden">
+        <F label="Raw-URL"><input className="inp" value={url} onChange={e=>setUrl(e.target.value)} placeholder="https://raw.githubusercontent.com/…"/></F>
+      </Modal>}
+    </div>
+  );
+}
+
+/* ════════════════════════════
+   EDITOR
+════════════════════════════ */
+function Editor({routeId,go,onTutEvent,isTutActive}){
+  const[route,setRoute]=useState(null);
+  const[showAdd,setShowAdd]=useState(false);
+  const[editing,setEditing]=useState(null);
+  const blank={km:'0',type:'STATION',name:'Hamburg Hbf',speed:'',speedEnd:'',gradient:'',notes:''};
+  const[form,setForm]=useState(blank);
+  const fv=(k,v)=>setForm(p=>({...p,[k]:v}));
+
+  useEffect(()=>{setRoute(DB.get().find(r=>r.id===routeId)||null);},[routeId]);
+  const save=objs=>{const all=DB.get().map(r=>r.id===routeId?{...r,objects:objs}:r);DB.set(all);setRoute(r=>({...r,objects:objs}));};
+  const saveObj=()=>{
+    const km=parseFloat(form.km.replace(',','.'));
+    if(isNaN(km))return;
+    const obj={id:editing?.id||Date.now(),km,type:form.type,name:form.name,
+      speed:parseInt(form.speed)||null,speedEnd:parseFloat(form.speedEnd)||null,
+      gradient:parseFloat(form.gradient.replace(',','.'))||null,notes:form.notes};
+    const objs=route.objects||[];
+    save((editing?objs.map(o=>o.id===editing.id?obj:o):[...objs,obj]).sort((a,b)=>a.km-b.km));
+    setShowAdd(false);
+    if(isTutActive)onTutEvent('modal-close');
+  };
+  const openFab=()=>{setEditing(null);setForm(blank);setShowAdd(true);if(isTutActive)onTutEvent('modal-open');};
+
+  if(!route)return null;
+  const needSpeed=['SPEED','LA'].includes(form.type);
+
+  return(
+    <div className="page">
+      <div className="bar">
+        <button className="ic" id="back-btn" onClick={()=>{go('home');if(isTutActive)onTutEvent('screen-home');}}>←</button>
+        <span style={{flex:1,fontWeight:600,fontSize:13}}>{route.name}</span>
+        <span className="bar-lbl">Editor</span>
+      </div>
+      <div className="scroll" style={{paddingBottom:8}}>
+        {(route.objects||[]).length===0
+          ?<div className="empty"><div style={{fontSize:12}}>Noch keine Objekte — + drücken</div></div>
+          :(route.objects||[]).map(obj=>{
+            const t=T[obj.type]||T.STATION;
+            const det=[];
+            if(obj.speed)det.push(obj.speed+' km/h');
+            if(obj.speedEnd)det.push('bis '+obj.speedEnd);
+            if(obj.gradient!=null)det.push((obj.gradient>0?'↗':'↘')+Math.abs(obj.gradient)+'‰');
+            return(
+              <div className="objr" key={obj.id}>
+                <span className="okm">{obj.km.toFixed(3)}</span>
+                <span className="otag" style={{background:t.bg,color:t.clr}}>{t.s}</span>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:13,fontWeight:500}}>{obj.name||t.l}</div>
+                  {det.length>0&&<div style={{fontFamily:'var(--mono)',fontSize:10,color:'var(--dim)'}}>{det.join(' · ')}</div>}
+                </div>
+                <div style={{display:'flex',gap:4,flexShrink:0}}>
+                  <button className="ic" style={{fontSize:12}} onClick={()=>{setEditing(obj);setForm({km:String(obj.km),type:obj.type,name:obj.name||'',speed:String(obj.speed||''),speedEnd:String(obj.speedEnd||''),gradient:String(obj.gradient??''),notes:obj.notes||''});setShowAdd(true);}}>✎</button>
+                  <button className="ic" style={{fontSize:12}} onClick={()=>save((route.objects||[]).filter(o=>o.id!==obj.id))}>✕</button>
+                </div>
+              </div>
+            );
+          })}
+      </div>
+      <Footer/>
+      <button className="fab" id="fab-btn" onClick={openFab}>+</button>
+
+      {showAdd&&(
+        <div className="ov" onClick={e=>e.target===e.currentTarget&&setShowAdd(false)}>
+          <div className="sheet" id="add-obj-sheet">
+            <div className="sheet-h">{editing?'Bearbeiten':'Objekt hinzufügen'}</div>
+            <div className="irow">
+              <F label="km"><input className="inp" value={form.km} onChange={e=>fv('km',e.target.value)} inputMode="decimal" placeholder="0.000"/></F>
+              <F label="Typ"><select className="inp" value={form.type} onChange={e=>fv('type',e.target.value)}>
+                {Object.entries(T).map(([k,v])=><option key={k} value={k}>{v.l}</option>)}
+              </select></F>
+            </div>
+            <F label="Name"><input className="inp" value={form.name} onChange={e=>fv('name',e.target.value)} placeholder={form.type==='STATION'?'z. B. München Hbf':'Bezeichnung'}/></F>
+            {needSpeed&&<>
+              <F label="Geschwindigkeit km/h"><input className="inp" type="number" value={form.speed} onChange={e=>fv('speed',e.target.value)}/></F>
+              {form.type==='LA'&&<F label="La-Ende km"><input className="inp" value={form.speedEnd} onChange={e=>fv('speedEnd',e.target.value)} inputMode="decimal"/></F>}
+            </>}
+            {form.type==='GRADE'&&<F label="‰ (negativ = Gefälle)"><input className="inp" value={form.gradient} onChange={e=>fv('gradient',e.target.value)} inputMode="decimal"/></F>}
+            <F label="Notizen"><input className="inp" value={form.notes} onChange={e=>fv('notes',e.target.value)}/></F>
+            <div className="sheet-f">
+              <button className="btn bo" onClick={()=>setShowAdd(false)}>Abbrechen</button>
+              <button className="btn bp" onClick={saveObj}>Speichern</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ════════════════════════════
+   START DIALOG
+════════════════════════════ */
+function StartDialog({routeId,go,onTutEvent,isTutActive}){
+  const route=DB.get().find(r=>r.id===routeId);
+  const stations=(route?.objects||[]).filter(o=>o.type==='STATION');
+  const[served,setServed]=useState(()=>Object.fromEntries(stations.map(s=>[s.id,true])));
+  const[times,setTimes]=useState(()=>Object.fromEntries(stations.map(s=>[s.id,{arr:'',dep:s.km===0?'10:00':''}])));
+  const[dep,setDep]=useState('10:00');
+  const[mode,setMode]=useState('TIME');
+  const[avg,setAvg]=useState('80');
+
+  if(!route)return null;
+
+  const startDrive=()=>{
+    const timetable=stations.map(s=>({
+      ...s,isServed:!!served[s.id],
+      arrival:times[s.id]?.arr||'',
+      departure:times[s.id]?.dep||'',
+    }));
+    const trip={id:Date.now(),mode,departure:dep,avgSpeed:parseFloat(avg)||80,offset:0,startKm:route.startKm};
+    go('drive',routeId,{trip,timetable,route});
+    if(isTutActive)onTutEvent('screen-drive');
+  };
+
+  return(
+    <div className="page">
+      <div className="bar">
+        <button className="ic" onClick={()=>go('home')}>←</button>
+        <span style={{flex:1,fontWeight:600,fontSize:13}}>{route.name}</span>
+        <span className="bar-lbl">Fahrt starten</span>
+      </div>
+      <div className="scroll" style={{paddingBottom:80}} id="start-sheet">
+        <div style={{background:'var(--s1)',border:'1px solid var(--b2)',borderRadius:4,padding:12,marginBottom:11}}>
+          <div style={{fontFamily:'var(--mono)',fontSize:9,color:'var(--faint)',letterSpacing:1,textTransform:'uppercase',marginBottom:9}}>Einstellungen</div>
+          <div className="irow">
+            <F label="Abfahrtszeit"><input className="inp" value={dep} onChange={e=>setDep(e.target.value)} placeholder="HH:MM"/></F>
+            <F label="Berechnung"><select className="inp" value={mode} onChange={e=>setMode(e.target.value)}>
+              <option value="TIME">Zeitbasiert</option>
+              <option value="SPEED">Ø-Geschwindigkeit</option>
+            </select></F>
+          </div>
+          {mode==='SPEED'&&<F label="Ø-Geschwindigkeit km/h"><input className="inp" type="number" value={avg} onChange={e=>setAvg(e.target.value)}/></F>}
+        </div>
+        {stations.length>0&&(
+          <div style={{background:'var(--s1)',border:'1px solid var(--b2)',borderRadius:4,padding:12}}>
+            <div style={{fontFamily:'var(--mono)',fontSize:9,color:'var(--faint)',letterSpacing:1,textTransform:'uppercase',marginBottom:9}}>Halte</div>
+            {stations.map((s,i)=>(
+              <div key={s.id} style={{marginBottom:i<stations.length-1?11:0,paddingBottom:i<stations.length-1?11:0,borderBottom:i<stations.length-1?'1px solid var(--b2)':'none'}}>
+                <label className="chk">
+                  <input type="checkbox" checked={!!served[s.id]} onChange={e=>setServed(p=>({...p,[s.id]:e.target.checked}))}/>
+                  <span style={{fontWeight:600}}>{s.name||'Bahnhof'}</span>
+                  <span style={{fontFamily:'var(--mono)',fontSize:10,color:'var(--faint)',marginLeft:4}}>km {s.km.toFixed(3)}</span>
+                </label>
+                {served[s.id]&&mode==='TIME'&&(
+                  <div className="irow" style={{marginTop:6,paddingLeft:21}}>
+                    <F label="Ankunft"><input className="inp" value={times[s.id]?.arr||''} onChange={e=>setTimes(p=>({...p,[s.id]:{...p[s.id],arr:e.target.value}}))} placeholder="HH:MM"/></F>
+                    <F label="Abfahrt"><input className="inp" value={times[s.id]?.dep||''} onChange={e=>setTimes(p=>({...p,[s.id]:{...p[s.id],dep:e.target.value}}))} placeholder="HH:MM"/></F>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      <div style={{position:'fixed',bottom:0,left:0,right:0,padding:'10px 13px',background:'var(--s1)',borderTop:'1px solid var(--b2)'}}>
+        <button className="btn bp" id="start-go-btn" style={{width:'100%',height:40,fontSize:14,letterSpacing:.8}} onClick={startDrive}>▶  FAHRT BEGINNEN</button>
+      </div>
+    </div>
+  );
+}
+
+/* ════════════════════════════
+   DRIVE / EBULA
+════════════════════════════ */
+function DriveView({routeId,tripData,go,tutAutoRun}){
+  const{route,timetable}=tripData;
+  const[trip,setTrip]=useState(tripData.trip);
+
+  // Zeit als Sekunden (number) im Ref für genaue Ticks,
+  // als string im State für Anzeige
+  const timeSec=useRef(toS(tripData.trip.departure)||0);
+  const[timeStr,setTimeStr]=useState(tripData.trip.departure||'00:00');
+  const[running,setRunning]=useState(false);
+  const[autoScroll,setAutoScroll]=useState(true);
+  const[showOffset,setShowOffset]=useState(false);
+  const tickRef=useRef(null);
+  const scrollRef=useRef(null);
+
+  // Tutorial: autorun
+  useEffect(()=>{if(tutAutoRun)setRunning(true);},[tutAutoRun]);
+
+  // Timer — tick every 100ms real = tutAutoRun ? 10s ingame : 1s ingame
+  useEffect(()=>{
+    clearInterval(tickRef.current);
+    if(running){
+      tickRef.current=setInterval(()=>{
+        const inc=tutAutoRun?10:1;
+        timeSec.current+=inc;
+        setTimeStr(fmtS(timeSec.current));
+      },100);
+    }
+    return()=>clearInterval(tickRef.current);
+  },[running,tutAutoRun]);
+
+  const items=useMemo(()=>{
+    const objs=[...(route.objects||[])];
+    timetable.forEach(s=>{const i=objs.findIndex(o=>o.id===s.id);if(i>=0)objs[i]={...objs[i],...s};});
+    return objs.sort((a,b)=>a.km-b.km);
+  },[route,timetable]);
+
+  const served=timetable.filter(s=>s.isServed);
+  const curKm=calcKm(timeStr,trip,served);
+  const prog=Math.max(0,Math.min(1,(curKm-route.startKm)/(route.endKm-route.startKm)));
+  const nextStop=served.filter(s=>s.km>curKm).sort((a,b)=>a.km-b.km)[0];
+  const prevStop=served.filter(s=>s.km<=curKm).sort((a,b)=>b.km-a.km)[0];
+
+  useEffect(()=>{
+    if(!autoScroll||!scrollRef.current)return;
+    let top=0;
+    for(const it of items){
+      if(it.km>curKm)break;
+      top+=it.type==='STATION'?STA_H:ROW_H;
+    }
+    scrollRef.current.scrollTo({top:top-scrollRef.current.clientHeight*.4,behavior:'smooth'});
+  },[curKm,autoScroll]);
+
+  const adjOff=d=>setTrip(t=>({...t,offset:(t.offset||0)+d}));
+
+  const manualTime=val=>{
+    setRunning(false);
+    timeSec.current=toS(val)||0;
+    setTimeStr(val);
+  };
+
+  return(
+    <div className="drive">
+      <div className="hud" id="drive-hud">
+        <div className="hcell" style={{paddingLeft:10}}>
+          <button className="ic" style={{width:24,height:20,fontSize:11,marginBottom:4}} onClick={()=>{clearInterval(tickRef.current);go('home');}}>←</button>
+          <div className="hlbl">STRECKE-KM</div>
+          <div className="hval">{curKm.toFixed(1)}</div>
+        </div>
+        <div className="hcenter">
+          {prevStop&&<div className="hprev">↑ {prevStop.name}</div>}
+          {nextStop
+            ?<><div className="hnext">→ {nextStop.name}</div>
+               <div className="hnextd">
+                 {nextStop.arrival&&'an '+nextStop.arrival}
+                 {nextStop.arrival&&nextStop.departure&&'  '}
+                 {nextStop.departure&&'ab '+nextStop.departure}
+                 {'  ·  '}{Math.max(0,nextStop.km-curKm).toFixed(1)} km
+               </div></>
+            :<div style={{fontSize:11,color:'var(--faint)',fontFamily:'var(--mono)'}}>Kein weiterer Halt</div>}
+        </div>
+        <div className="htcell">
+          <div className="hlbl" style={{textAlign:'right'}}>INGAME-ZEIT</div>
+          <input className="htime" value={timeStr} onChange={e=>manualTime(e.target.value)}/>
+          <div style={{display:'flex',gap:4}}>
+            <button className="ic" style={{width:26,height:22,fontSize:11,color:autoScroll?'var(--green2)':'var(--faint)'}} onClick={()=>setAutoScroll(a=>!a)}>⊙</button>
+            <button className="ic" style={{width:26,height:22,fontSize:11,color:showOffset?'var(--acc)':'var(--faint)'}} onClick={()=>setShowOffset(s=>!s)}>⚙</button>
+          </div>
+        </div>
+      </div>
+
+      <div className="prog"><div className="progf" style={{width:prog*100+'%'}}/></div>
+
+      <div className="bfp">
+        {/* km-Skala */}
+        <div className="kmcol">
+          <div className="kmcol-in">
+            {items.map((it,i)=>(
+              <div key={i} className="kmtick" style={{height:it.type==='STATION'?STA_H:ROW_H}}>
+                <span className={`kmn ${Math.abs(it.km-curKm)<.35?'act':it.km%1===0?'maj':''}`}>
+                  {it.km%1===0?it.km.toFixed(0):it.km.toFixed(1)}
+                </span>
+              </div>
+            ))}
+            <div style={{height:100}}/>
+          </div>
+        </div>
+
+        {/* Hauptstreifen */}
+        <div className="bscroll" ref={scrollRef}>
+          {items.map((item,i)=>{
+            const isSta=item.type==='STATION';
+            const isL=LEFT.includes(item.type);
+            const isR=RIGHT.includes(item.type);
+            const tp=T[item.type]||T.STATION;
+            const passed=item.km<curKm-.1;
+            const isCur=Math.abs(item.km-curKm)<.2;
+            const h=isSta?STA_H:ROW_H;
+            return(
+              <div key={item.id||i} className="brow" style={{
+                height:h,borderBottom:`1px solid ${isSta?'var(--b2)':'var(--b2)'}`,
+                background:isCur?'#0f1f0f':isSta?'#0e0e1800':'transparent'}}>
+                {/* Links */}
+                <div className="bleft" style={{height:h}}>
+                  {isL&&<div style={{textAlign:'right'}}>
+                    {item.type==='SPEED'&&<div className="siml" style={{color:'var(--yel)'}}>{item.speed||'V'}<span style={{fontSize:8}}> km/h</span></div>}
+                    {item.type==='LA'&&<div className="siml" style={{color:'var(--red)'}}>La {item.speed||'?'}{item.speedEnd&&<span style={{fontSize:8}}><br/>–{item.speedEnd}</span>}</div>}
+                    {item.type==='BUE'&&<div className="siml" style={{color:'var(--red)'}}>BÜ</div>}
+                    {item.name&&<div style={{fontFamily:'var(--mono)',fontSize:8,color:'var(--faint)'}}>{item.name}</div>}
+                  </div>}
+                </div>
+                {/* Mitte */}
+                <div className="bmid" style={{height:h}}>
+                  <div className="gleis" style={{background:passed?'var(--s3)':isCur?'var(--green2)':'var(--b2)'}}/>
+                  {isSta&&<div className="bfsym" style={{
+                    width:item.isServed?13:8,height:item.isServed?13:8,
+                    background:item.isServed?(passed?'var(--dim)':'var(--text)'):'var(--b2)'}}/> }
+                  {item.type==='SPEED'&&<div style={{position:'absolute',top:'50%',left:0,right:0,height:2,background:'var(--yel)',opacity:.7,zIndex:1}}/>}
+                  {item.type==='LA'&&<div style={{position:'absolute',top:'50%',left:0,right:0,height:2,background:'var(--red)',opacity:.7,zIndex:1}}/>}
+                  {item.type==='BUE'&&<div style={{position:'absolute',top:'50%',left:0,right:0,height:1,background:'var(--red)',opacity:.55,zIndex:1}}/>}
+                  {isCur&&<>
+                    <div className="pdiam"/>
+                    <div className="parm" style={{right:'calc(50% + 6px)',width:62}}/>
+                    <div className="parm" style={{left:'calc(50% + 6px)',width:76}}/>
+                  </>}
+                </div>
+                {/* Rechts */}
+                <div className="bright" style={{height:h}}>
+                  {isSta&&item.isServed?(
+                    <div>
+                      <div className="bfname" style={{color:passed?'var(--faint)':'var(--text)'}}>{item.name||'Bahnhof'}</div>
+                      <div className="bftimes">
+                        {item.arrival&&'an '+item.arrival}{item.arrival&&item.departure&&'  '}{item.departure&&'ab '+item.departure}
+                      </div>
+                    </div>
+                  ):isSta?(
+                    <div className="simr" style={{color:'var(--faint)'}}>{item.name} <span style={{fontSize:9}}>(Durchfahrt)</span></div>
+                  ):isR?(
+                    <div className="simr" style={{color:tp.clr}}>
+                      {item.type==='SIGNAL'&&(item.name||'Signal')}
+                      {item.type==='TU_S'&&`⊢ Tunnel ${item.name||''}`}
+                      {item.type==='TU_E'&&'Tunnel ⊣'}
+                      {item.type==='GRADE'&&item.gradient!=null&&`${item.gradient>0?'↗':'↘'}${Math.abs(item.gradient)}‰${item.name?' '+item.name:''}`}
+                    </div>
+                  ):null}
+                </div>
+              </div>
+            );
+          })}
+          <div style={{height:100,display:'flex',alignItems:'flex-start',paddingTop:14,paddingLeft:8}}>
+            <span style={{fontFamily:'var(--mono)',fontSize:9,color:'var(--faint)',letterSpacing:2}}>══ STRECKENENDE km {route.endKm} ══</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="dfoot" id="drive-foot">
+        <button className={`btn bsm ${running?'bx':'bp'}`} style={{letterSpacing:.5}} onClick={()=>setRunning(r=>!r)}>
+          {running?'⏹ STOP':'▶ START'}
+        </button>
+        {showOffset&&(
+          <div className="offwrap">
+            <span style={{fontFamily:'var(--mono)',fontSize:9,color:'var(--faint)'}}>km±</span>
+            <span className="offval" style={{fontFamily:'var(--mono)',fontSize:10,color:'var(--acc)',minWidth:32,textAlign:'center'}}>
+              {(trip.offset||0)>=0?'+':''}{(trip.offset||0).toFixed(1)}
+            </span>
+            {[-1,-.1,.1,1].map(d=><button key={d} className="ob" onClick={()=>adjOff(d)}>{d>0?'+':''}{d}</button>)}
+            <button className="ob" onClick={()=>setTrip(t=>({...t,offset:0}))}>↺</button>
+          </div>
+        )}
+        <span style={{fontFamily:'var(--mono)',fontSize:9,color:'var(--faint)',marginLeft:'auto'}}>
+          {route.name} · {Math.max(0,route.endKm-curKm).toFixed(1)} km
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/* ════════════════════════════
+   APP ROOT — Tutorial-Manager
+════════════════════════════ */
+function App(){
+  const[screen,setScreen]=useState('home');
+  const[routeId,setRouteId]=useState(null);
+  const[tripData,setTripData]=useState(null);
+  const[tutStep,setTutStep]=useState(0);
+  const[tutActive,setTutActive]=useState(!DB.tutDone());
+  const[tutAutoRun,setTutAutoRun]=useState(false);
+
+  const go=(s,rid,extra)=>{
+    setScreen(s);
+    if(rid!==undefined)setRouteId(rid);
+    if(extra!==undefined)setTripData(extra);
+  };
+
+  // Tutorial: Events aus Screens empfangen
+  const onTutEvent=useCallback((event)=>{
+    if(event==='restart'){
+      setTutStep(0);setTutActive(true);setTutAutoRun(false);
+      setScreen('home');return;
+    }
+    setTutStep(prev=>{
+      const s=STEPS[prev];
+      if(s&&s.waitFor===event){
+        const next=prev+1;
+        if(next>=STEPS.length){DB.markTut();setTutActive(false);return prev;}
+        // Wenn wir zur Drive-Ansicht kommen: autorun starten
+        if(STEPS[next]&&STEPS[next].target==='drive-foot'){
+          setTimeout(()=>setTutAutoRun(true),800);
+        }
+        return next;
+      }
+      return prev;
+    });
+  },[]);
+
+  const tutNext=()=>{
+    const next=tutStep+1;
+    if(next>=STEPS.length){DB.markTut();setTutActive(false);setTutAutoRun(false);return;}
+    setTutStep(next);
+    if(STEPS[next]&&STEPS[next].target==='drive-foot'){
+      setTimeout(()=>setTutAutoRun(true),600);
+    }
+  };
+  const tutSkip=()=>{DB.markTut();setTutActive(false);setTutAutoRun(false);};
+
+  const isTutActive=tutActive;
+
+  if(screen==='drive'&&tripData){
+    return(
+      <>
+        <DriveView routeId={routeId} tripData={tripData} go={(...a)=>{setTutAutoRun(false);go(...a);}} tutAutoRun={tutAutoRun}/>
+        {tutActive&&<Tutorial step={tutStep} onNext={tutNext} onSkip={tutSkip} totalSteps={STEPS.length} waitingFor={STEPS[tutStep]?.waitFor}/>}
+      </>
+    );
+  }
+
+  return(
+    <div className="app">
+      {screen==='home'  &&<Home go={go} onTutEvent={onTutEvent} tutStep={tutStep} isTutActive={isTutActive}/>}
+      {screen==='editor'&&<Editor routeId={routeId} go={go} onTutEvent={onTutEvent} isTutActive={isTutActive}/>}
+      {screen==='start' &&<StartDialog routeId={routeId} go={go} onTutEvent={onTutEvent} isTutActive={isTutActive}/>}
+      {tutActive&&<Tutorial step={tutStep} onNext={tutNext} onSkip={tutSkip} totalSteps={STEPS.length} waitingFor={STEPS[tutStep]?.waitFor}/>}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
