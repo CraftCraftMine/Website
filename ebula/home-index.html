@@ -1,0 +1,307 @@
+<!--
+  Project:     CCMC™ Web EBuLa
+  Part of:     CraftCraftMine Network™ (CCMN™)
+  Copyright:   (c) 2026 CraftCraftMine Network™ – All rights reserved.
+  Description: Privates Hobby-Projekt für Train Sim World Simulationen.
+               Nicht für kommerzielle Zwecke bestimmt.
+  Info:        https://craftcraftmine.net/ueberuns
+-->
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>CCMN™ Web EBuLa</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="shared/types.js"></script>
+<script src="shared/db.js"></script>
+<script src="shared/calc.js"></script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+:root{
+  --bg:#09090d;--s1:#111116;--s2:#16161d;--s3:#1d1d26;
+  --b1:#252532;--b2:#303040;
+  --text:#c4c4d6;--dim:#686880;--faint:#30303f;
+  --pri:#3a7ec4;--pri2:#1e4f88;--red:#b03030;
+  --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body,#root{height:100%;overflow:hidden;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);}
+::-webkit-scrollbar{width:3px;} ::-webkit-scrollbar-thumb{background:var(--b2);}
+.page{display:flex;flex-direction:column;height:100dvh;}
+.bar{display:flex;align-items:center;gap:9px;padding:0 13px;height:44px;background:var(--s1);border-bottom:1px solid var(--b1);flex-shrink:0;}
+.brand{font-family:var(--mono);font-size:11px;letter-spacing:3px;color:var(--pri);flex:1;}
+.scroll{flex:1;overflow-y:auto;padding:12px 12px 80px;}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:0 12px;height:30px;border-radius:3px;border:none;cursor:pointer;font-family:var(--sans);font-size:12px;font-weight:500;white-space:nowrap;}
+.bp{background:var(--pri2);color:#b8d4f0;border:1px solid #3a7ec440;} .bp:hover{background:var(--pri);color:#fff;}
+.bo{background:transparent;color:var(--dim);border:1px solid var(--b2);} .bo:hover{background:var(--s3);color:var(--text);}
+.bx{background:transparent;color:var(--red);border:1px solid #b0303028;} .bx:hover{background:#b0303018;}
+.bsm{height:26px;padding:0 9px;font-size:11px;}
+.ic{width:28px;height:28px;border-radius:3px;background:transparent;border:1px solid var(--b1);cursor:pointer;color:var(--dim);font-size:14px;display:inline-flex;align-items:center;justify-content:center;}
+.ic:hover{background:var(--s3);color:var(--text);}
+.fab{position:fixed;bottom:74px;right:14px;width:44px;height:44px;border-radius:50%;background:var(--pri2);border:1px solid var(--pri)44;cursor:pointer;font-size:20px;color:#b8d4f0;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 18px #1e4f8840;z-index:41;}
+.field{margin-bottom:10px;} .field>label{display:block;font-family:var(--mono);font-size:9px;color:var(--dim);margin-bottom:4px;text-transform:uppercase;letter-spacing:.8px;}
+.inp{width:100%;background:var(--s2);border:1px solid var(--b1);border-radius:3px;padding:7px 9px;color:var(--text);font-family:var(--sans);font-size:13px;outline:none;}
+.inp:focus{border-color:var(--pri2);} textarea.inp{resize:vertical;min-height:60px;}
+.irow{display:flex;gap:8px;} .irow .field{flex:1;}
+.ov{position:fixed;inset:0;background:#000000b0;z-index:300;display:flex;align-items:flex-end;}
+.sheet{background:var(--s1);border:1px solid var(--b1);border-top:2px solid var(--pri2);border-radius:12px 12px 0 0;width:100%;max-height:92dvh;overflow-y:auto;padding:17px 14px;}
+.sheet-h{font-size:15px;font-weight:600;margin-bottom:13px;}
+.sheet-f{display:flex;gap:7px;justify-content:flex-end;margin-top:13px;padding-top:10px;border-top:1px solid var(--b1);}
+.rcard{background:var(--s1);border:1px solid var(--b1);border-radius:4px;margin-bottom:9px;}
+.rcard-h{padding:11px 13px;}
+.rcard-n{font-weight:600;font-size:14px;}
+.rcard-m{font-family:var(--mono);font-size:10px;color:var(--faint);margin-top:3px;line-height:1.6;}
+.rcard-a{display:flex;gap:6px;padding:7px 13px;background:var(--s2);border-top:1px solid var(--b1);flex-wrap:wrap;align-items:center;}
+.empty{display:flex;flex-direction:column;align-items:center;padding:52px 20px;gap:8px;color:var(--faint);text-align:center;}
+.footer{flex-shrink:0;background:var(--s1);border-top:1px solid var(--b1);padding:10px 13px;}
+.footer-logo{font-family:var(--mono);font-size:9px;color:var(--pri);letter-spacing:2px;margin-bottom:5px;}
+.footer-txt{font-size:10px;color:var(--dim);line-height:1.6;}
+.gh-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--b1);}
+.gh-row:last-child{border-bottom:none;}
+</style>
+</head>
+<body>
+<!-- Splash Screen — verdeckt das Laden -->
+<div id="splash" style="position:fixed;inset:0;background:#09090d;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;font-family:'IBM Plex Mono',monospace;">
+  <div style="font-size:20px;font-weight:600;color:#3a7ec4;letter-spacing:3px;">CCMC™ Web EBuLa</div>
+  <div style="font-size:10px;color:#2a4a6a;letter-spacing:2px;">powered by CraftCraftMine Network™</div>
+  <div style="margin-top:18px;width:48px;height:1px;background:linear-gradient(90deg,transparent,#3a7ec4,transparent);animation:sl 1.2s ease-in-out infinite;" id="sll"></div>
+</div>
+<style>@keyframes sl{0%,100%{opacity:.2}50%{opacity:1}}</style>
+<script>
+  window.addEventListener('load',function(){
+    setTimeout(function(){
+      var s=document.getElementById('splash');
+      if(!s)return;
+      s.style.transition='opacity .5s ease';
+      s.style.opacity='0';
+      setTimeout(function(){s.remove();},550);
+    },700);
+  });
+</script>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+const F = ({label, req, children}) => (
+  <div className="field">
+    <label>{label}{req && <span style={{color:'var(--red)',marginLeft:3}}>*</span>}</label>
+    {children}
+  </div>
+);
+
+function GHBrowser({onImport, onClose}) {
+  const [loading, setLoading] = useState(true);
+  const [list, setList] = useState([]);
+  const [err, setErr] = useState('');
+  const [imp, setImp] = useState(null);
+  useEffect(() => {
+    fetch(GH_RAW + 'index.json')
+      .then(r => { if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+      .then(d => { setList(d.routes||[]); setLoading(false); })
+      .catch(e => { setErr(e.message); setLoading(false); });
+  }, []);
+  const doImp = async item => {
+    setImp(item.file);
+    try {
+      const res = await fetch(GH_RAW + item.file);
+      if (!res.ok) throw new Error();
+      const r = DB.migrate(await res.json());
+      r.id = Date.now().toString();
+      onImport(r);
+    } catch { alert('Import fehlgeschlagen'); }
+    setImp(null);
+  };
+  return (
+    <div className="ov" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="sheet">
+        <div className="sheet-h">GitHub: {GH_REPO}</div>
+        {loading && <div style={{color:'var(--dim)',fontSize:12,padding:'8px 0'}}>Lade…</div>}
+        {err && <div style={{color:'var(--red)',fontSize:11,lineHeight:1.7,marginBottom:8}}>
+          Nicht erreichbar: {err}<br/>
+          <span style={{color:'var(--faint)'}}>Repo muss public sein + index.json enthalten.</span>
+        </div>}
+        {list.map(item => (
+          <div className="gh-row" key={item.file}>
+            <div style={{flex:1}}>
+              <div style={{fontWeight:600,fontSize:13}}>{item.name}</div>
+              {item.desc && <div style={{fontSize:11,color:'var(--dim)'}}>{item.desc}</div>}
+            </div>
+            <button className="btn bp bsm" onClick={()=>doImp(item)} disabled={!!imp}>
+              {imp===item.file?'…':'Import'}
+            </button>
+          </div>
+        ))}
+        {!loading && !err && list.length===0 && (
+          <div style={{color:'var(--dim)',fontSize:12}}>Keine Strecken gefunden.</div>
+        )}
+        <div className="sheet-f"><button className="btn bo" onClick={onClose}>Schließen</button></div>
+      </div>
+    </div>
+  );
+}
+
+function NewRouteSheet({onClose, onCreate}) {
+  const [form, setForm] = useState({
+    name:'', desc:'', author:'', start:'0', end:'100',
+    zugTyp:'', streckenNr:'', spurweite:'1435'
+  });
+  const fv = (k,v) => setForm(p=>({...p,[k]:v}));
+  const ok = () => {
+    if (!form.name.trim()) return;
+    const authorErr = checkReservedAuthor(form.author);
+    if (authorErr) { alert(authorErr); return; }
+    onCreate({
+      id: Date.now().toString(),
+      version: EBULA_VERSION,
+      name: form.name.trim(),
+      desc: form.desc.trim(),
+      author: form.author.trim(),
+      startKm: parseFloat(form.start)||0,
+      endKm: parseFloat(form.end)||100,
+      zugTyp: form.zugTyp.trim(),
+      streckenNr: form.streckenNr.trim(),
+      spurweite: parseInt(form.spurweite)||1435,
+      objects: [],
+      timetables: [],
+      createdAt: new Date().toISOString(),
+    });
+  };
+  return (
+    <div className="ov" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="sheet">
+        <div className="sheet-h">Neue Strecke</div>
+        <F label="Name" req><input className="inp" value={form.name} autoFocus
+          onChange={e=>fv('name',e.target.value)} placeholder="München – Augsburg"/></F>
+        <F label="Beschreibung (optional)">
+          <textarea className="inp" value={form.desc} onChange={e=>fv('desc',e.target.value)}
+            placeholder="Kurze Beschreibung, z. B. Streckenverlauf, TSW-Szenario…"/>
+        </F>
+        <div className="irow">
+          <F label="Start-km"><input className="inp" type="number" value={form.start} onChange={e=>fv('start',e.target.value)}/></F>
+          <F label="End-km"><input className="inp" type="number" value={form.end} onChange={e=>fv('end',e.target.value)}/></F>
+        </div>
+        <div style={{fontFamily:'var(--mono)',fontSize:9,color:'var(--faint)',textTransform:'uppercase',letterSpacing:1,margin:'6px 0 8px'}}>Optional — Zusatzinfos</div>
+        <div className="irow">
+          <F label="Autor"><input className="inp" value={form.author} onChange={e=>fv('author',e.target.value)} placeholder="Dein Name"/></F>
+          <F label="Strecken-Nr."><input className="inp" value={form.streckenNr} onChange={e=>fv('streckenNr',e.target.value)} placeholder="z. B. 5900"/></F>
+        </div>
+        <div className="irow">
+          <F label="Fahrzeugtyp"><input className="inp" value={form.zugTyp} onChange={e=>fv('zugTyp',e.target.value)} placeholder="z. B. IC2, S-Bahn"/></F>
+          <F label="Spurweite mm"><input className="inp" type="number" value={form.spurweite} onChange={e=>fv('spurweite',e.target.value)}/></F>
+        </div>
+        <div className="sheet-f">
+          <button className="btn bo" onClick={onClose}>Abbrechen</button>
+          <button className="btn bp" onClick={ok} disabled={!form.name.trim()}>Erstellen</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Home() {
+  const [routes, setRoutes] = useState(DB.get());
+  const [showNew, setShowNew]   = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const [showGH, setShowGH]     = useState(false);
+  const rf = () => setRoutes(DB.get());
+
+  const doCreate = r => { DB.save(r); rf(); setShowNew(false); };
+  const doDel = id => { if(!confirm('Strecke löschen?'))return; DB.delete(id); rf(); };
+  const doExp = r => {
+    const exportData = { ...JSON_META, ...r };
+    const a = document.createElement('a');
+    a.href = 'data:application/json,' + encodeURIComponent(JSON.stringify(exportData,null,2));
+    a.download = r.name.replace(/\s+/g,'-') + '.json'; a.click();
+  };
+  const doImpFile = e => {
+    const f = e.target.files[0]; if (!f) return;
+    const rd = new FileReader();
+    rd.onload = ev => {
+      try { const r = DB.migrate(JSON.parse(ev.target.result)); r.id = Date.now().toString(); DB.save(r); rf(); }
+      catch { alert('Ungültige JSON-Datei'); }
+    };
+    rd.readAsText(f);
+  };
+  const doImpGH = r => { DB.save(r); rf(); setShowGH(false); };
+  const addDemo = () => {
+    const r = DB.migrate({...DEMO_ROUTE, id: Date.now().toString()});
+    DB.save(r); rf();
+  };
+  const openAnsicht = r => {
+    const hash = encodeURIComponent(r.name.toLowerCase().replace(/\s+/g,'-'));
+    window.location.href = `ansicht/#${hash}`;
+  };
+
+  return (
+    <div className="page">
+      <div className="bar">
+        <span className="brand">CCMN™ EBULA</span>
+        <button className="ic" title="Tutorial" onClick={()=>window.location.href='tutorial/'}>?</button>
+        <button className="ic" style={{fontSize:16}} onClick={()=>setShowMenu(m=>!m)}>☰</button>
+      </div>
+
+      {showMenu && (
+        <div style={{background:'var(--s2)',borderBottom:'1px solid var(--b1)',padding:'8px 12px',display:'flex',gap:7,flexWrap:'wrap'}}>
+          <label className="btn bo bsm" style={{cursor:'pointer'}}>
+            Import <input type="file" accept=".json" style={{display:'none'}} onChange={doImpFile}/>
+          </label>
+          <button className="btn bo bsm" onClick={()=>{setShowGH(true);setShowMenu(false);}}>GitHub</button>
+          <button className="btn bo bsm" onClick={()=>{addDemo();setShowMenu(false);}}>Demo-Strecke laden</button>
+          <button className="btn bo bsm" onClick={()=>{DB.resetTut();window.location.href='tutorial/';}}>Tutorial starten</button>
+        </div>
+      )}
+
+      <div className="scroll">
+        {routes.length === 0 ? (
+          <div className="empty">
+            <div style={{fontSize:13,fontWeight:600}}>Keine Strecken vorhanden</div>
+            <div style={{fontSize:11}}>+ drücken um eine neue anzulegen</div>
+            <button className="btn bp bsm" style={{marginTop:8}} onClick={addDemo}>Demo-Strecke laden</button>
+            <button className="btn bo bsm" onClick={()=>window.location.href='tutorial/'}>Tutorial starten</button>
+          </div>
+        ) : routes.map(r => (
+          <div className="rcard" key={r.id}>
+            <div className="rcard-h">
+              <div className="rcard-n">{r.name}</div>
+              {r.desc && <div style={{fontSize:11,color:'var(--dim)',marginTop:2}}>{r.desc}</div>}
+              <div className="rcard-m">
+                km {r.startKm}–{r.endKm} · {(r.objects||[]).length} Obj. · {(r.objects||[]).filter(o=>o.type==='STATION').length} Bf. · {(r.timetables||[]).length} Fahrpläne
+                {r.author && ` · ${r.author}`}
+                {r.streckenNr && ` · Str. ${r.streckenNr}`}
+                {r.createdAt && ` · ${new Date(r.createdAt).toLocaleDateString('de-DE')}`}
+              </div>
+            </div>
+            <div className="rcard-a">
+              <button className="btn bo bsm" onClick={()=>window.location.href=`editor/#${r.id}`}>Editor</button>
+              <button className="btn bo bsm" onClick={()=>window.location.href=`fahrplaene/#${r.id}`}>Fahrpläne</button>
+              <button className="btn bp bsm" onClick={()=>openAnsicht(r)}>▶ Ansicht</button>
+              <button className="btn bo bsm" style={{marginLeft:'auto'}} onClick={()=>doExp(r)}>Export</button>
+              <button className="btn bx bsm" onClick={()=>doDel(r.id)}>✕</button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="footer">
+        <div className="footer-logo">CCMN™ WEB EBULA</div>
+        <div className="footer-txt">
+          <strong style={{color:'var(--text)'}}>Hobby-Projekt – Nicht kommerziell</strong><br/>
+          Privates, schulisches Projekt von Schülern für Schüler. Keinerlei Gewinnerzielungsabsicht.<br/>
+          © 2026 CraftCraftMine Netzwerk · CCMN™ = CraftCraftMine Netzwerk™
+        </div>
+      </div>
+
+      <button className="fab" onClick={()=>setShowNew(true)}>+</button>
+      {showNew && <NewRouteSheet onClose={()=>setShowNew(false)} onCreate={doCreate}/>}
+      {showGH   && <GHBrowser onImport={doImpGH} onClose={()=>setShowGH(false)}/>}
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<Home/>);
+</script>
+</body>
+</html>
