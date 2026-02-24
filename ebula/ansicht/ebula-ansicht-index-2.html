@@ -1,0 +1,808 @@
+<!--
+  Project:     CCMC™ Web EBuLa
+  Part of:     CraftCraftMine Network™ (CCMN™)
+  Copyright:   (c) 2026 CraftCraftMine Network™ – All rights reserved.
+  Description: Privates Hobby-Projekt für Train Sim World Simulationen.
+               Nicht für kommerzielle Zwecke bestimmt.
+  Info:        https://craftcraftmine.net/ueberuns
+-->
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>CCMN™ Web EBuLa – Ansicht</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="../shared/types.js"></script>
+<script src="../shared/db.js"></script>
+<script src="../shared/calc.js"></script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body,#root{height:100%;overflow:hidden;background:#111;}
+
+.portrait-warn{
+  display:none;position:fixed;inset:0;background:#000;z-index:9999;
+  align-items:center;justify-content:center;flex-direction:column;gap:16px;
+  font-family:'IBM Plex Mono',monospace;color:#666;font-size:14px;text-align:center;
+}
+@media (orientation:portrait) and (max-width:900px){.portrait-warn{display:flex;}}
+
+/* ── Device ── */
+.device{
+  width:100vw;height:100dvh;
+  background:linear-gradient(145deg,#2a2a2a,#1a1a1a);
+  display:flex;flex-direction:column;
+  font-family:'IBM Plex Mono',monospace;
+  user-select:none;overflow:hidden;
+}
+
+/* ── Obere Buttons
+   FESTE HÖHE, alle Buttons GLEICHE Größe.
+   Kein Text-/Größenwechsel je nach Zustand.
+   Aktiv = nur Leuchtfarbe + Glow.
+── */
+.top-btns{
+  height:42px;  /* FESTE Höhe — ändert sich NIE */
+  display:flex;align-items:center;
+  padding:0 8px;gap:4px;
+  background:linear-gradient(180deg,#252525,#1c1c1c);
+  border-bottom:1px solid #333;
+  flex-shrink:0;
+}
+.tbtn{
+  /* FESTE Größe — ändert sich NIE */
+  width:40px;height:28px;
+  flex-shrink:0;
+  background:linear-gradient(180deg,#363636,#282828);
+  border:1px solid #3e3e3e;border-bottom:2px solid #0a0a0a;
+  border-radius:4px;cursor:pointer;
+  font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;
+  color:#777;
+  display:flex;align-items:center;justify-content:center;
+  /* Nur Farb-Transitions, KEINE Größen-Transitions */
+  transition:color .12s, border-color .12s, box-shadow .12s;
+}
+.tbtn:active{transform:translateY(1px);border-bottom-width:1px;}
+/* Leuchten — nur Farbe, keine Background-Änderung */
+.tbtn.on  {color:#4dca70;border-color:#2a5a2a;box-shadow:0 0 5px #4dca7038;}
+.tbtn.on-r{color:#ca4d4d;border-color:#5a2a2a;box-shadow:0 0 5px #ca4d4d38;}
+.tbtn.on-b{color:#4a8ed4;border-color:#1a3a6a;box-shadow:0 0 5px #4a8ed438;}
+.tsep{width:1px;height:20px;background:#2a2a2a;flex-shrink:0;margin:0 2px;}
+.tsp{flex:1;}
+
+/* ── Mittlerer Bereich ── */
+.mid{display:flex;flex:1;min-height:0;}
+
+/* ── Display ──
+   Wenn "aus": nur Opacity, KEINE Größenänderung.
+   Damit verschieben sich Buttons nicht.
+── */
+.display{
+  flex:1;display:flex;flex-direction:column;min-width:0;
+  background:#000;border:2px solid #2a2a2a;margin:0 3px;
+  position:relative;
+}
+.display.off{opacity:0;pointer-events:none;}
+.night .display{filter:sepia(1) hue-rotate(100deg) saturate(.35) brightness(.75);}
+.disp-filter{/* Helligkeit/Kontrast nur auf den Inhalt, nicht auf Buttons */}
+
+/* Header */
+.dhdr{
+  display:grid;grid-template-columns:58px 1fr 106px 90px;
+  border-bottom:1px solid #1e1e1e;flex-shrink:0;background:#070707;
+}
+.dhc{
+  padding:3px 6px;font-family:'IBM Plex Mono',monospace;font-size:11px;
+  border-right:1px solid #181818;display:flex;align-items:center;
+}
+.dhc:last-child{border-right:none;}
+.hc-yr{color:#444;font-size:9px;}
+.hc-st{color:#c84040;font-weight:600;justify-content:center;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.hc-st.ok{color:#3a9a50;}
+.hc-dt{color:#444;font-size:9px;justify-content:flex-end;}
+.hc-tm{color:#c8c8d8;font-size:13px;font-weight:600;justify-content:center;}
+
+/* Info-Zeile */
+.dinfo{
+  display:flex;align-items:center;padding:2px 6px;
+  border-bottom:1px solid #111;background:#040404;
+  flex-shrink:0;font-size:10px;min-height:20px;gap:8px;
+}
+.di-l{color:#3a7ec4;font-weight:600;flex-shrink:0;}
+.di-r{color:#555;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;}
+
+/* Fortschritt */
+.prog{height:1px;background:#080808;flex-shrink:0;}
+.prog-f{height:100%;background:#182818;}
+
+/* BFP */
+.bfp{flex:1;overflow-y:auto;overflow-x:hidden;background:#000;}
+.bfp::-webkit-scrollbar{width:2px;}
+.bfp::-webkit-scrollbar-thumb{background:#181818;}
+
+/* Kopfzeile */
+.bfp-hd{
+  display:grid;grid-template-columns:52px 18px 46px 1fr 52px 52px;
+  background:#090909;border-bottom:1px solid #1a1a1a;
+  position:sticky;top:0;z-index:20;
+}
+.bfphc{
+  padding:3px;font-size:8px;color:#2e2e2e;text-transform:uppercase;
+  letter-spacing:.3px;border-right:1px solid #111;text-align:center;
+}
+.bfphc:last-child{border-right:none;}
+
+/* Zeile */
+.brow{
+  display:grid;grid-template-columns:52px 18px 46px 1fr 52px 52px;
+  border-bottom:1px solid #0c0c0c;
+}
+.brow.cur{background:#08140a;}
+
+/* V-Spalte */
+.cv{border-right:1px solid #111;position:relative;overflow:hidden;}
+/* Track-Spalte */
+.ct{border-right:1px solid #111;position:relative;display:flex;align-items:center;justify-content:center;}
+.gl{position:absolute;top:0;bottom:0;width:2px;left:50%;transform:translateX(-50%);z-index:0;}
+.bfsym{border-radius:50%;position:relative;z-index:2;}
+.vtick{position:absolute;left:0;right:0;height:2px;top:50%;z-index:1;}
+.pdiam{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%) rotate(45deg);
+  width:10px;height:10px;z-index:10;
+  border:2px solid #000;background:#38b060;
+}
+.parm{position:absolute;top:50%;height:1px;z-index:9;background:#38b060;opacity:.25;}
+/* km */
+.ck{border-right:1px solid #111;display:flex;align-items:center;justify-content:flex-end;padding:0 4px;}
+.kmv{font-size:10px;color:#3a3a3a;}
+.kmv.c{color:#38b060;font-weight:600;}
+/* Name */
+.cn{border-right:1px solid #111;padding:3px 5px;display:flex;flex-direction:column;justify-content:center;overflow:hidden;}
+.bfnm{font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.bfnt{font-size:9px;color:#303030;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+/* Zeit */
+.ca{display:flex;align-items:center;justify-content:center;border-left:1px solid #111;border-right:1px solid #111;}
+.cd{display:flex;align-items:center;justify-content:center;}
+.bft{font-size:10px;color:#b89030;}
+
+/* Status-Bar */
+.sbar{
+  display:flex;align-items:center;gap:6px;padding:2px 6px;
+  border-top:1px solid #111;background:#030303;
+  flex-shrink:0;font-size:9px;min-height:18px;
+}
+.sp{background:#080808;border:1px solid #181818;border-radius:2px;padding:1px 5px;color:#3a3a3a;}
+.sp.hi{color:#3a7ec4;}
+.sp.wr{color:#c84040;border-color:#3a1a1a;}
+
+/* Overlay */
+.ov{position:absolute;inset:0;background:#000000e0;z-index:50;display:flex;align-items:center;justify-content:center;}
+.ovb{
+  background:#0b0b0b;border:1px solid #282828;border-top:2px solid #3a7ec4;
+  border-radius:4px;padding:16px;max-width:320px;width:90%;
+}
+.ovt{font-size:11px;color:#3a7ec4;margin-bottom:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;}
+.ovd{font-size:11px;color:#666;line-height:1.75;}
+.ovd strong{color:#aaa;}
+.ovbtn{
+  background:#0c0c1a;border:1px solid #282848;border-radius:3px;
+  color:#3a7ec4;padding:5px 10px;cursor:pointer;
+  font-family:'IBM Plex Mono',monospace;font-size:10px;
+}
+.ovbtn.r{background:#1a0c0c;border-color:#482828;color:#c84040;}
+.ovin{
+  width:100%;background:#050505;border:1px solid #282828;border-radius:3px;
+  padding:6px 8px;color:#c84040;font-family:'IBM Plex Mono',monospace;font-size:11px;
+  outline:none;margin-top:8px;
+}
+
+/* ── Rechte Buttons ── */
+.rb{display:flex;flex-direction:column;gap:3px;padding:4px 5px 4px 2px;justify-content:center;flex-shrink:0;}
+.rbtn{
+  width:34px;height:32px;
+  background:linear-gradient(180deg,#363636,#282828);
+  border:1px solid #3e3e3e;border-bottom:2px solid #0a0a0a;border-radius:4px;
+  cursor:pointer;font-size:12px;color:#666;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'IBM Plex Mono',monospace;font-weight:600;
+}
+.rbtn:active{transform:translateY(1px);border-bottom-width:1px;}
+.rbtn.rc{color:#c84040;}
+.rbtn.re{color:#3a9a50;}
+
+/* ── Untere Reihe ── */
+.bot{
+  height:40px; /* FESTE Höhe */
+  display:flex;align-items:center;gap:3px;
+  padding:0 7px;
+  background:linear-gradient(180deg,#1c1c1c,#222);
+  border-top:1px solid #2e2e2e;flex-shrink:0;
+}
+.nbtn{
+  width:32px;height:28px;
+  background:linear-gradient(180deg,#313131,#242424);
+  border:1px solid #363636;border-bottom:2px solid #0a0a0a;border-radius:3px;
+  cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:11px;
+  color:#555;display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+  transition:color .12s,border-color .12s,box-shadow .12s;
+}
+.nbtn:active{transform:translateY(1px);border-bottom-width:1px;}
+.nbtn.on{color:#3a7ec4;border-color:#1a3664;box-shadow:0 0 4px #3a7ec428;}
+.nbsm{width:26px;font-size:10px;}
+.vlbl{
+  margin-left:auto;padding:3px 7px;
+  background:#070707;border:1px solid #1c1c1c;border-radius:3px;
+  font-family:'IBM Plex Mono',monospace;font-size:8px;
+  color:#284860;letter-spacing:.8px;text-align:center;line-height:1.5;
+  cursor:pointer;flex-shrink:0;
+}
+.vlbl:hover{color:#3a7ec4;}
+
+/* Softkey-Labels im Display (unter dem BFP) */
+.d-sklabels {
+  display:grid;grid-template-columns:repeat(8,1fr);
+  border-top:1px solid #181818;background:#030303;
+  flex-shrink:0;
+}
+.d-sklabel {
+  padding:2px 0;text-align:center;
+  font-family:'IBM Plex Mono',monospace;font-size:8px;font-weight:600;
+  color:#2a4a2a;letter-spacing:.3px;border-right:1px solid #111;
+  overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
+}
+.d-sklabel:last-child{border-right:none;}
+.d-sklabel.active{color:#3a7ec4;}
+</style>
+</head>
+<body>
+<div id="splash" style="position:fixed;inset:0;background:#09090d;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;font-family:'IBM Plex Mono',monospace;">
+  <div style="font-size:20px;font-weight:600;color:#3a7ec4;letter-spacing:3px;">CCMC™ Web EBuLa</div>
+  <div style="font-size:10px;color:#2a4a6a;letter-spacing:2px;">powered by CraftCraftMine Netzwerk™</div>
+  <div style="margin-top:18px;width:48px;height:1px;background:linear-gradient(90deg,transparent,#3a7ec4,transparent);animation:sl 1.2s ease-in-out infinite;"></div>
+</div>
+<style>@keyframes sl{0%,100%{opacity:.2}50%{opacity:1}}</style>
+<script>window.addEventListener('load',function(){setTimeout(function(){var s=document.getElementById('splash');if(!s)return;s.style.transition='opacity .5s ease';s.style.opacity='0';setTimeout(function(){s.remove();},550);},700);});</script>
+<div class="portrait-warn">
+  <div style="font-size:32px">↻</div>
+  <div>Bitte Gerät drehen<br/><span style="font-size:11px;color:#444">CCMN™ Web EBuLa</span></div>
+</div>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef, useMemo, useCallback } = React;
+
+function EBuLaDisplay() {
+  const [route,    setRoute]    = useState(null);
+  const [tripData, setTripData] = useState(null);
+  const [loading,  setLoading]  = useState(true);
+  const [errMsg,   setErrMsg]   = useState('');
+
+  const [displayOn,  setDisplayOn]  = useState(true);
+  const [nightMode,  setNightMode]  = useState(false);
+  const [brightness, setBrightness] = useState(100);
+  const [contrast,   setContrast]   = useState(100);
+  const [showV,      setShowV]      = useState(true);
+  const [staOnly,    setStaOnly]    = useState(false);
+  const [reversed,   setReversed]   = useState(false);
+  const [activeOv,   setOv]         = useState(null);
+  const [stoerung,   setStoerung]   = useState('');
+  const [stoerungOn, setStoerungOn] = useState(false);
+  const [ttIdx,      setTTIdx]      = useState(0);
+  const [autoScr,    setAutoScr]    = useState(true);
+  const [offset,     setOffset]     = useState(0);
+  const [delay,      setDelay]      = useState(0);   // Verspätung in Sekunden (+= verspätet)
+
+  const timeSec = useRef(0);
+  const [timeStr, setTimeStr] = useState('00:00:00');
+  const [running,  setRunning]  = useState(false);
+  const tickRef = useRef(null);
+  const bfpRef  = useRef(null);
+
+  useEffect(() => {
+    const s = DB.getSettings();
+    if (s.brightness) setBrightness(s.brightness);
+    if (s.contrast)   setContrast(s.contrast);
+    if (s.nightMode)  setNightMode(s.nightMode);
+  }, []);
+
+  useEffect(() => {
+    const hash = getRouteHashName();
+    let r = null;
+    if (hash) r = DB.getByName(hash);
+    if (!r && hash === 'demo') r = DEMO_ROUTE;
+    if (!r) { const all = DB.get(); if (all.length) r = all[all.length-1]; }
+    if (!r) { setLoading(false); setErrMsg('Keine Route gefunden.'); return; }
+    setRoute(r);
+    if ((r.timetables||[]).length > 0) loadTT(r, r.timetables[0], 0);
+    setLoading(false);
+  }, []);
+
+  const loadTT = (r, tt, idx) => {
+    const dep = DB._normTime(tt.departure) || '00:00:00';
+    timeSec.current = timeToSec(dep) || 0;
+    setTimeStr(secToTime(timeSec.current));
+    setTTIdx(idx);
+    setTripData({
+      trip: { mode:tt.mode, departure:dep, avgSpeed:tt.avgSpeed||100, startKm:r.startKm||0 },
+      timetable: tt.stops || [],
+      tt
+    });
+    DB.setActiveTTId(r.id, tt.id);
+  };
+
+  const selectTT = useCallback(i => {
+    if (!route?.timetables?.[i]) return;
+    setRunning(false);
+    loadTT(route, route.timetables[i], i);
+  }, [route]);
+
+  // Timer 1:1
+  useEffect(() => {
+    clearInterval(tickRef.current);
+    if (running) tickRef.current = setInterval(() => {
+      timeSec.current += 1;
+      setTimeStr(secToTime(timeSec.current));
+    }, 1000);
+    return () => clearInterval(tickRef.current);
+  }, [running]);
+
+  const served = useMemo(() =>
+    (tripData?.timetable||[]).filter(s => s.served !== false), [tripData]);
+
+  const curKm = useMemo(() => {
+    if (!tripData) return route?.startKm || 0;
+    // delay (Sek.) einrechnen: Verspätung = Zug ist "zeitlich zurück"
+    const delayedTime = secToTime(Math.max(0, (timeToSec(timeStr)||0) - delay));
+    return calcKm(delayedTime, {...tripData.trip, offset}, served);
+  }, [timeStr, tripData, offset, served]);
+
+  // Basis-Items mit eingemergten Fahrplan-Zeiten
+  const baseItems = useMemo(() => {
+    if (!route) return [];
+    let objs = [...(route.objects||[])];
+    (tripData?.timetable||[]).forEach(s => {
+      const i = objs.findIndex(o => o.id===s.sid || (o.km===s.km && o.type==='STATION'));
+      if (i>=0) objs[i] = {...objs[i], ttArr:DB._normTime(s.arr), ttDep:DB._normTime(s.dep), ttServed:s.served!==false};
+    });
+    return objs;
+  }, [route, tripData]);
+
+  const items = useMemo(() => {
+    let o = [...baseItems];
+    if (staOnly) o = o.filter(x => x.type==='STATION');
+    if (!showV)  o = o.filter(x => x.type!=='SPEED' && x.type!=='LA');
+    // Standard: absteigend (hohe km = Zukunft = oben)
+    // reversed: aufsteigend (für Rückwärtsfahrt)
+    if (!reversed) o = [...o].sort((a,b) => b.km - a.km);
+    else           o = [...o].sort((a,b) => a.km - b.km);
+    return o;
+  }, [baseItems, staOnly, showV, reversed]);
+
+  /* ── V-Klammern: pro Zeile berechnen ──
+     Jedes Item weiß: bin ich im Segment? bin ich erstes/letztes Item?
+     Kein absolutes Positioning mehr → kein Bug.
+  */
+  const vItems = useMemo(() => {
+    // V-Segmente berechnen
+    const segs = calcVSegs(items);
+    let top = 0;
+    return items.map(item => {
+      const h   = item.type==='STATION' ? STA_H : ROW_H;
+      const myT = top;
+      top += h;
+      const seg = segs.find(s => myT >= s.top && myT < s.top+s.height) || null;
+      return {
+        ...item,
+        _h:    h,
+        _seg:  seg,
+        _first: seg ? myT===seg.top : false,
+        _last:  seg ? (myT+h >= seg.top+seg.height) : false,
+      };
+    });
+  }, [items]);
+
+  const nextStop = useMemo(() => findNextStop(served, curKm), [served, curKm]);
+  const prevStop = useMemo(() => findPrevStop(served, curKm), [served, curKm]);
+  const curItem  = useMemo(() => findCurrentItem(items, curKm), [items, curKm]);
+  const prog     = route ? Math.max(0,Math.min(1,(curKm-route.startKm)/(route.endKm-route.startKm))) : 0;
+
+  // Auto-Scroll
+  useEffect(() => {
+    if (!autoScr || !bfpRef.current) return;
+    // Liste ist absteigend: Zukunft oben, Vergangenheit unten.
+    // curKm-Position = die Zeile wo km am nächsten an curKm liegt.
+    // Wir scrollen so dass diese Zeile bei 40% von oben liegt.
+    let top = 0;
+    let found = false;
+    for (const it of vItems) {
+      const h = it._h;
+      if (!reversed && it.km <= curKm + 0.1) { found = true; break; }
+      if (reversed  && it.km >= curKm - 0.1) { found = true; break; }
+      top += h;
+    }
+    bfpRef.current.scrollTo({top: top - bfpRef.current.clientHeight*0.4, behavior:'smooth'});
+  }, [curKm, autoScr, vItems, reversed]);
+
+  useEffect(() => { DB.saveSettings({brightness,contrast,nightMode}); }, [brightness,contrast,nightMode]);
+
+  const manScr = dir => { setAutoScr(false); bfpRef.current?.scrollBy({top:dir*80,behavior:'smooth'}); };
+  const adjOff   = d => setOffset(o => +(o+d).toFixed(1));
+  const adjDelay = d => setDelay(s => s + d);  // +5 = 5s mehr Verspätung
+
+  const now = new Date();
+  const dispDate = `${String(now.getDate()).padStart(2,'0')}.${String(now.getMonth()+1).padStart(2,'0')}.${now.getFullYear()}`;
+  const ttValid = !!(tripData && served.length>0);
+  const crYear  = tripData?.tt?.createdAt ? new Date(tripData.tt.createdAt).getFullYear() : '–';
+  const dispStyle = {filter:`brightness(${brightness}%) contrast(${contrast}%)`};
+
+  if (loading) return <div className="device" style={{alignItems:'center',justifyContent:'center',color:'#333',fontSize:12}}>Lade…</div>;
+  if (errMsg && !route) return (
+    <div className="device" style={{alignItems:'center',justifyContent:'center',flexDirection:'column',gap:12,color:'#555',fontSize:11}}>
+      <div style={{color:'#c84040'}}>{errMsg}</div>
+      <button onClick={()=>window.location.href='../'} style={{background:'#1a1a1a',border:'1px solid #333',borderRadius:3,color:'#888',padding:'6px 14px',cursor:'pointer',fontSize:11}}>← Zurück</button>
+    </div>
+  );
+
+  return (
+    <div className={`device ${nightMode?'night':''}`}>
+
+      {/* ══ Obere Buttons — FESTE Höhe 42px, Buttons IMMER gleich groß ══ */}
+      <div className="top-btns">
+        {/* ☀ An/Aus — leuchtet grün wenn aus (also dunkel) */}
+        <button className={`tbtn ${!displayOn?'on':''}`} style={{fontSize:15}}
+          onClick={()=>setDisplayOn(d=>!d)} title="Display An/Aus">☀</button>
+
+        <div className="tsep"/>
+
+        <button className="tbtn" onClick={()=>setOv(v=>v==='strecke'?null:'strecke')} title="Streckeninfo">S</button>
+        <button className="tbtn" onClick={()=>setOv(v=>v==='info'?null:'info')} title="Objektinfo">i</button>
+
+        {/* St — leuchtet rot wenn Störung aktiv */}
+        <button className={`tbtn ${stoerungOn?'on-r':''}`}
+          onClick={()=>setOv(v=>v==='stoerung'?null:'stoerung')} title="Störungsmeldung">St</button>
+
+        <div className="tsep"/>
+
+        {/* -5s / +5s Verspätungskorrektur */}
+        <button className="tbtn" onClick={()=>adjDelay(-5)}  title="-5s Verspätung">-5s</button>
+        <button className="tbtn" onClick={()=>adjDelay(+5)}  title="+5s Verspätung">+5s</button>
+
+        <div className="tsep"/>
+
+        {/* V>0 — leuchtet grün wenn DEAKTIVIERT (also V ausgeblendet) */}
+        <button className={`tbtn ${!showV?'on':''}`}
+          onClick={()=>setShowV(v=>!v)} title="V-Beschränkungen">V&gt;0</button>
+
+        {/* V=0 — leuchtet grün wenn Stationen-nur aktiv */}
+        <button className={`tbtn ${staOnly?'on':''}`}
+          onClick={()=>setStaOnly(s=>!s)} title="Nur Stationen">V=0</button>
+
+        <div className="tsep"/>
+
+        {/* ◑ Nachtmodus — leuchtet blau wenn aktiv */}
+        <button className={`tbtn ${nightMode?'on-b':''}`} style={{fontSize:14}}
+          onClick={()=>setNightMode(n=>!n)} title="Nachtmodus">◑</button>
+
+        {/* UD — leuchtet grün wenn umgekehrt */}
+        <button className={`tbtn ${reversed?'on':''}`}
+          onClick={()=>setReversed(r=>!r)} title="Richtung umkehren">UD</button>
+
+        <div className="tsp"/>
+
+        {/* Helligkeit ± */}
+        <button className="tbtn" style={{fontSize:13}}
+          onClick={()=>setBrightness(b=>Math.min(160,b+10))} title="Heller">☀</button>
+        <button className="tbtn" style={{fontSize:10}}
+          onClick={()=>setBrightness(b=>Math.max(30,b-10))} title="Dunkler">☼</button>
+
+        {/* Vollbild */}
+        <button className="tbtn" style={{fontSize:13}} title="Vollbild"
+          onClick={()=>{
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+            else document.exitFullscreen?.();
+          }}>⛶</button>
+      </div>
+
+      {/* ══ Mitte ══ */}
+      <div className="mid">
+
+        {/* ── Display — nur opacity ändert sich, KEINE Größenänderung ── */}
+        <div className={`display ${!displayOn?'off':''}`} style={dispStyle}>
+
+          {/* Header */}
+          <div className="dhdr">
+            <div className="dhc hc-yr">{crYear}</div>
+            <div className={`dhc hc-st ${ttValid?'ok':''}`}>
+              {ttValid
+                ? (tripData.tt.zugNummer
+                    ? `${tripData.tt.zugNummer} · ${tripData.tt.name}`
+                    : tripData.tt.name||'Fahrplan aktiv')
+                : 'Kein Fahrplan'}
+            </div>
+            <div className="dhc hc-dt">{dispDate}</div>
+            <div className="dhc hc-tm">{timeStr}</div>
+          </div>
+
+          {/* Info-Zeile */}
+          <div className="dinfo">
+            <span className="di-l">ab km {curKm.toFixed(1)}{tripData?.trip?.mode==='SPEED'?` · ${tripData.trip.avgSpeed} km/h`:''}</span>
+            <span className="di-r">
+              {nextStop
+                ? `Nächster Halt: ${nextStop.name||'–'} · ${Math.max(0,nextStop.km-curKm).toFixed(1)} km`
+                : prevStop ? `Ziel erreicht: ${prevStop.name}` : ''}
+            </span>
+          </div>
+
+          <div className="prog"><div className="prog-f" style={{width:prog*100+'%'}}/></div>
+
+          {/* BFP */}
+          <div className="bfp" ref={bfpRef}>
+            <div className="bfp-hd">
+              <div className="bfphc" style={{textAlign:'right',paddingRight:3}}>V</div>
+              <div className="bfphc"/>
+              <div className="bfphc">km</div>
+              <div className="bfphc" style={{textAlign:'left',paddingLeft:4}}>Bezeichnung</div>
+              <div className="bfphc">an</div>
+              <div className="bfphc">ab</div>
+            </div>
+
+            {vItems.map((item, i) => {
+              const isSta = item.type==='STATION';
+              const isR   = ['SIGNAL','TU_S','TU_E','GRADE'].includes(item.type);
+              const tp    = TYPES[item.type]||TYPES.STATION;
+              const h     = item._h;
+              const seg   = item._seg;
+              // Liste absteigend: km > curKm = noch nicht erreicht = ZUKUNFT (oben)
+              //                  km < curKm = schon vorbei = VERGANGENHEIT (unten)
+              // Bei reversed (aufsteigend): umgekehrt
+              const passed = reversed ? item.km > curKm+0.1 : item.km < curKm-0.1;
+              const isCur  = Math.abs(item.km-curKm) < (isSta?0.5:0.2);
+              const srv    = isSta && item.ttServed;
+
+              return (
+                <div key={item.id||i} className={`brow ${isCur?'cur':''}`}
+                  style={{height:h, opacity:passed?.42:1}}>
+
+                  {/* V-Spalte — Klammern inline, kein Absolutpositioning auf Containerebene */}
+                  <div className="cv" style={{height:h}}>
+                    {seg && <>
+                      {/* Linie durch die ganze Zeile */}
+                      <div style={{position:'absolute',top:0,bottom:0,right:10,width:1,background:seg.color,opacity:.5}}/>
+                      {/* Oben-Querstrich (nur beim ersten Item) */}
+                      {item._first && <div style={{position:'absolute',top:1,right:10,height:1,width:8,background:seg.color,opacity:.75}}/>}
+                      {/* Unten-Querstrich (nur beim letzten Item) */}
+                      {item._last  && <div style={{position:'absolute',bottom:1,right:10,height:1,width:8,background:seg.color,opacity:.75}}/>}
+                      {/* Zahl (nur beim ersten Item) */}
+                      {item._first && <div style={{
+                        position:'absolute',top:2,right:12,
+                        fontFamily:'IBM Plex Mono',fontWeight:600,fontSize:10,
+                        color:seg.color,lineHeight:1
+                      }}>{seg.speed}</div>}
+                    </>}
+                    {item.type==='BUE' && <span style={{
+                      position:'absolute',right:2,top:'50%',transform:'translateY(-50%)',fontSize:8,color:'#903030'
+                    }}>BÜ</span>}
+                  </div>
+
+                  {/* Track */}
+                  <div className="ct" style={{height:h}}>
+                    <div className="gl" style={{background:passed?'#0c0c0c':isCur?'#38b060':'#222'}}/>
+                    {isSta && <div className="bfsym" style={{
+                      width:srv?12:7,height:srv?12:7,
+                      background:srv?(passed?'#242424':'#c4c4d6'):'#161616',
+                      border:`2px solid ${isCur?'#38b060':'#000'}`
+                    }}/>}
+                    {item.type==='SPEED' && <div className="vtick" style={{background:'#a89020',opacity:.75}}/>}
+                    {item.type==='LA'    && <div className="vtick" style={{background:'#b03030',opacity:.75}}/>}
+                    {item.type==='BUE'   && <div className="vtick" style={{background:'#b03030',opacity:.35,height:1}}/>}
+                    {item.type==='TU_S'  && <div style={{position:'absolute',top:2,left:'50%',transform:'translateX(-50%)',fontSize:10,color:'#252525',zIndex:3}}>⊢</div>}
+                    {item.type==='TU_E'  && <div style={{position:'absolute',bottom:2,left:'50%',transform:'translateX(-50%)',fontSize:10,color:'#252525',zIndex:3}}>⊣</div>}
+                    {isCur && <>
+                      <div className="pdiam"/>
+                      <div className="parm" style={{right:'calc(50% + 5px)',width:50}}/>
+                      <div className="parm" style={{left:'calc(50% + 5px)',width:80}}/>
+                    </>}
+                  </div>
+
+                  {/* km */}
+                  <div className="ck" style={{height:h}}>
+                    <span className={`kmv ${isCur?'c':''}`}>{item.km.toFixed(1)}</span>
+                  </div>
+
+                  {/* Name */}
+                  <div className="cn" style={{height:h}}>
+                    {isSta ? <>
+                      <div className="bfnm" style={{color:passed?'#2e2e2e':srv?'#c4c4d6':'#3e3e3e'}}>
+                        {item.name||'Bahnhof'}
+                        {!srv && <span style={{color:'#252525',fontWeight:400,fontSize:9}}> (Df)</span>}
+                      </div>
+                      {item.notes && <div className="bfnt">{item.notes}</div>}
+                    </> : isR
+                      ? <div className="bfnt" style={{color:tp.clr}}>
+                          {item.type==='SIGNAL' && (item.name||'Signal')}
+                          {item.type==='TU_S'   && `⊢ ${item.name||'Tunnel'}`}
+                          {item.type==='TU_E'   && `${item.name||'Tunnel'} ⊣`}
+                          {item.type==='GRADE'  && item.gradient!=null && `${item.gradient>0?'↗':'↘'} ${Math.abs(item.gradient)}‰${item.name?' '+item.name:''}`}
+                        </div>
+                      : item.notes ? <div className="bfnt">{item.notes}</div> : null}
+                  </div>
+
+                  {/* Ankunft / Abfahrt */}
+                  <div className="ca" style={{height:h}}>
+                    {isSta && srv && item.ttArr && <span className="bft">{item.ttArr.slice(0,5)}</span>}
+                  </div>
+                  <div className="cd" style={{height:h}}>
+                    {isSta && srv && item.ttDep && <span className="bft">{item.ttDep.slice(0,5)}</span>}
+                  </div>
+                </div>
+              );
+            })}
+
+            <div style={{height:80,display:'flex',alignItems:'flex-start',paddingTop:10,paddingLeft:118}}>
+              <span style={{fontFamily:'IBM Plex Mono',fontSize:8,color:'#181818',letterSpacing:2}}>
+                ══ STRECKENENDE km {route?.endKm} ══
+              </span>
+            </div>
+          </div>
+
+          {/* Softkey-Labels im Display */}
+          <div className="d-sklabels">
+            {['Zug','FSD','','GW','Zeit','','GNT','G'].map((l,i) => (
+              <div key={i} className={`d-sklabel${l?'':' '}`}>{l}</div>
+            ))}
+          </div>
+
+          {/* Status-Bar */}
+          <div className="sbar">
+            <span className="sp">RW {reversed?'↑':'↓'}</span>
+            <span className="sp hi">km {curKm.toFixed(3)}</span>
+            {tripData?.trip?.mode==='SPEED' && <span className="sp">Ø {tripData.trip.avgSpeed} km/h</span>}
+            <span className="sp">GSM-R</span>
+            {stoerungOn && <span className="sp wr">{stoerung}</span>}
+            {delay !== 0 && <span className="sp" style={{color:delay>0?'#c84040':'#3a9a50'}}>{delay>0?'+':''}{delay}s</span>}
+            <span style={{marginLeft:'auto',color:'#1c1c1c'}}>{offset!==0?`km±${offset>0?'+':''}${offset.toFixed(1)}`:''}</span>
+          </div>
+
+          {/* ── Overlays ── */}
+          {activeOv==='strecke' && route && (
+            <div className="ov" onClick={()=>setOv(null)}>
+              <div className="ovb">
+                <div className="ovt">S — Streckeninfo</div>
+                <div className="ovd">
+                  <strong>{route.name}</strong><br/>
+                  {route.desc && <>{route.desc}<br/></>}
+                  km {route.startKm} → {route.endKm} · {route.endKm-route.startKm} km<br/>
+                  {route.streckenNr&&<>Str.-Nr. {route.streckenNr}<br/></>}
+                  {route.zugTyp&&<>Fahrzeug: {route.zugTyp}<br/></>}
+                  {route.author&&<>Autor: {route.author}<br/></>}
+                  Richtung: {reversed?'↑ Umgekehrt':'↓ Normal'}<br/>
+                  {route.createdAt&&<>Erstellt: {new Date(route.createdAt).toLocaleDateString('de-DE')}<br/></>}
+                  Objekte: {(route.objects||[]).length} · Fahrpläne: {(route.timetables||[]).length}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeOv==='info' && (
+            <div className="ov" onClick={()=>setOv(null)}>
+              <div className="ovb">
+                <div className="ovt">i — Objektinfo</div>
+                <div className="ovd">
+                  <strong>Position:</strong> km {curKm.toFixed(3)}<br/>
+                  {curItem&&<>
+                    <strong>Objekt:</strong> {curItem.name||TYPES[curItem.type]?.l||curItem.type}<br/>
+                    Typ: {TYPES[curItem.type]?.s} · km {curItem.km.toFixed(3)}<br/>
+                    {curItem.notes&&<>{curItem.notes}<br/></>}
+                  </>}
+                  {nextStop&&<>
+                    <br/><strong>Nächster Halt:</strong> {nextStop.name}<br/>
+                    km {nextStop.km.toFixed(1)} · noch {Math.max(0,nextStop.km-curKm).toFixed(1)} km<br/>
+                    {nextStop.ttArr&&<>an {nextStop.ttArr}<br/></>}
+                    {nextStop.ttDep&&<>ab {nextStop.ttDep}<br/></>}
+                  </>}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeOv==='stoerung' && (
+            <div className="ov" onClick={e=>e.target===e.currentTarget&&setOv(null)}>
+              <div className="ovb">
+                <div className="ovt">St — Störungsmeldung</div>
+                <div className="ovd">
+                  Wird in der Statusleiste angezeigt.
+                  <input className="ovin" value={stoerung} maxLength={40} autoFocus
+                    onChange={e=>setStoerung(e.target.value)}
+                    placeholder="z. B. Gleisschaden bei km 5,5"/>
+                  <div style={{display:'flex',gap:8,marginTop:10,justifyContent:'flex-end'}}>
+                    <button className="ovbtn r" onClick={()=>{setStoerungOn(false);setStoerung('');setOv(null);}}>Löschen</button>
+                    <button className="ovbtn" onClick={()=>{setStoerungOn(!!stoerung.trim());setOv(null);}}>Bestätigen E</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeOv==='einstellungen' && (
+            <div className="ov" onClick={e=>e.target===e.currentTarget&&setOv(null)}>
+              <div className="ovb">
+                <div className="ovt">Licht &amp; Kontrast</div>
+                <div className="ovd">
+                  <div style={{marginBottom:10}}>
+                    <label style={{display:'block',marginBottom:4,color:'#444',fontSize:10}}>Helligkeit {brightness}%</label>
+                    <input type="range" min={30} max={160} value={brightness} onChange={e=>setBrightness(+e.target.value)} style={{width:'100%',accentColor:'#3a7ec4'}}/>
+                  </div>
+                  <div style={{marginBottom:10}}>
+                    <label style={{display:'block',marginBottom:4,color:'#444',fontSize:10}}>Kontrast {contrast}%</label>
+                    <input type="range" min={50} max={200} value={contrast} onChange={e=>setContrast(+e.target.value)} style={{width:'100%',accentColor:'#3a7ec4'}}/>
+                  </div>
+                  <label style={{display:'flex',alignItems:'center',gap:8,cursor:'pointer',fontSize:11}}>
+                    <input type="checkbox" checked={nightMode} onChange={e=>setNightMode(e.target.checked)} style={{accentColor:'#3a7ec4'}}/>
+                    Nachtmodus (Grün-Filter)
+                  </label>
+                  <div style={{marginTop:10,display:'flex',gap:8,justifyContent:'flex-end'}}>
+                    <button className="ovbtn r" onClick={()=>{setBrightness(100);setContrast(100);setNightMode(false);}}>Reset</button>
+                    <button className="ovbtn" onClick={()=>setOv(null)}>Schließen</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ── Rechte Buttons ── */}
+        <div className="rb">
+          <button className="rbtn rc" onClick={()=>{ if(activeOv){setOv(null);} else {setRunning(false);window.location.href='../';} }}>C</button>
+          <div style={{flex:1}}/>
+          <button className="rbtn" onClick={()=>manScr(-3)}>◄</button>
+          <button className="rbtn" onClick={()=>manScr(3)}>►</button>
+          <div style={{flex:1}}/>
+          <button className="rbtn" onClick={()=>adjOff(-0.1)}>▲</button>
+          <button className="rbtn" onClick={()=>adjOff(+0.1)}>▼</button>
+          <div style={{flex:1}}/>
+          <button className="rbtn re" onClick={()=>{
+            if (activeOv==='stoerung'){setStoerungOn(!!stoerung.trim());setOv(null);}
+            else setAutoScr(a=>!a);
+          }}>E</button>
+        </div>
+      </div>
+
+      {/* ══ Untere Reihe — FESTE Höhe 40px ══ */}
+      <div className="bot">
+        <button className={`nbtn ${running?'on':''}`} style={{width:38,fontSize:13}}
+          onClick={()=>setRunning(r=>!r)}>
+          {running?'⏹':'▶'}
+        </button>
+
+        {[1,2,3,4,5,6,7,8,9,0].map((n,i)=>{
+          const idx = n===0?9:n-1;
+          const has = route && (route.timetables||[]).length>idx;
+          return (
+            <button key={n} className={`nbtn ${ttIdx===idx&&has?'on':''}`}
+              style={{opacity:has?1:.22}}
+              onClick={()=>selectTT(idx)}
+              title={has?route.timetables[idx].name:`Fahrplan ${n}`}>
+              {n}
+            </button>
+          );
+        })}
+
+        <button className={`nbtn nbsm ${autoScr?'on':''}`} onClick={()=>setAutoScr(a=>!a)} title="Auto-Scroll">⊙</button>
+        <button className="nbtn nbsm" onClick={()=>setOffset(0)} title="km-Versatz reset">↺</button>
+
+        <div className="vlbl" onClick={()=>setOv(v=>v==='einstellungen'?null:'einstellungen')}>
+          CCMC™<br/>Web EBuLa
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<EBuLaDisplay/>);
+</script>
+</body>
+</html>
