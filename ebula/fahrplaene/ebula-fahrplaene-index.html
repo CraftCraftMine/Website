@@ -1,0 +1,275 @@
+<!--
+  Project:     CCMC™ Web EBuLa
+  Part of:     CraftCraftMine Netzwerk™ (CCMN™)
+  Copyright:   (c) 2026 CraftCraftMine Netzwerk™ – All rights reserved.
+  Support:     support@craftcraftmine.net
+-->
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>CCMC™ Web EBuLa – Fahrpläne</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="../shared/types.js"></script>
+<script src="../shared/db.js"></script>
+<script src="../shared/calc.js"></script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+:root{
+  --bg:#09090d;--s1:#111116;--s2:#16161d;--s3:#1d1d26;
+  --b1:#252532;--b2:#303040;
+  --text:#c4c4d6;--dim:#686880;--faint:#30303f;
+  --pri:#3a7ec4;--pri2:#1e4f88;--red:#b03030;--acc:#b89030;
+  --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body,#root{height:100%;overflow:hidden;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);}
+::-webkit-scrollbar{width:3px;} ::-webkit-scrollbar-thumb{background:var(--b2);}
+.page{display:flex;flex-direction:column;height:100dvh;}
+.bar{display:flex;align-items:center;gap:9px;padding:0 13px;height:44px;background:var(--s1);border-bottom:1px solid var(--b1);flex-shrink:0;}
+.bar-lbl{font-family:var(--mono);font-size:9px;color:var(--faint);letter-spacing:1px;text-transform:uppercase;}
+.scroll{flex:1;overflow-y:auto;padding:12px 12px 80px;}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:0 12px;height:30px;border-radius:3px;border:none;cursor:pointer;font-family:var(--sans);font-size:12px;font-weight:500;white-space:nowrap;}
+.bp{background:var(--pri2);color:#b8d4f0;border:1px solid #3a7ec440;} .bp:hover{background:var(--pri);color:#fff;}
+.bo{background:transparent;color:var(--dim);border:1px solid var(--b2);} .bo:hover{background:var(--s3);color:var(--text);}
+.bx{background:transparent;color:var(--red);border:1px solid #b0303028;} .bx:hover{background:#b0303018;}
+.bsm{height:26px;padding:0 9px;font-size:11px;}
+.ic{width:28px;height:28px;border-radius:3px;background:transparent;border:1px solid var(--b1);cursor:pointer;color:var(--dim);font-size:14px;display:inline-flex;align-items:center;justify-content:center;}
+.ic:hover{background:var(--s3);color:var(--text);}
+.fab{position:fixed;bottom:14px;right:14px;width:44px;height:44px;border-radius:50%;background:var(--pri2);border:1px solid var(--pri);cursor:pointer;font-size:20px;color:#b8d4f0;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 18px #1e4f8840;z-index:41;}
+.field{margin-bottom:10px;} .field>label{display:block;font-family:var(--mono);font-size:9px;color:var(--dim);margin-bottom:4px;text-transform:uppercase;letter-spacing:.8px;}
+.inp{width:100%;background:var(--s2);border:1px solid var(--b1);border-radius:3px;padding:7px 9px;color:var(--text);font-family:var(--sans);font-size:13px;outline:none;}
+.inp:focus{border-color:var(--pri2);}
+.irow{display:flex;gap:8px;} .irow .field{flex:1;}
+.chk{display:flex;align-items:center;gap:7px;cursor:pointer;font-size:13px;padding:2px 0;}
+.chk input{width:14px;height:14px;accent-color:var(--pri);cursor:pointer;}
+.ov{position:fixed;inset:0;background:#000000b0;z-index:300;display:flex;align-items:flex-end;}
+.sheet{background:var(--s1);border:1px solid var(--b1);border-top:2px solid var(--pri2);border-radius:12px 12px 0 0;width:100%;max-height:92dvh;overflow-y:auto;padding:17px 14px;}
+.sheet-h{font-size:15px;font-weight:600;margin-bottom:13px;}
+.sheet-f{display:flex;gap:7px;justify-content:flex-end;margin-top:13px;padding-top:10px;border-top:1px solid var(--b1);}
+.rcard{background:var(--s1);border:1px solid var(--b1);border-radius:4px;margin-bottom:9px;}
+.rcard-h{padding:11px 13px;}
+.rcard-n{font-weight:600;font-size:14px;}
+.rcard-m{font-family:var(--mono);font-size:10px;color:var(--faint);margin-top:3px;line-height:1.6;}
+.rcard-a{display:flex;gap:6px;padding:7px 13px;background:var(--s2);border-top:1px solid var(--b1);flex-wrap:wrap;align-items:center;}
+.empty{display:flex;flex-direction:column;align-items:center;padding:48px 20px;gap:8px;color:var(--faint);text-align:center;}
+.stop-row{padding:10px 0;border-bottom:1px solid var(--b1);}
+.stop-row:last-child{border-bottom:none;}
+</style>
+</head>
+<body>
+<div id="splash" style="position:fixed;inset:0;background:#09090d;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;font-family:'IBM Plex Mono',monospace;">
+  <div style="font-size:20px;font-weight:600;color:#3a7ec4;letter-spacing:3px;">CCMC™ Web EBuLa</div>
+  <div style="font-size:10px;color:#2a4a6a;letter-spacing:2px;">powered by CraftCraftMine Netzwerk™</div>
+  <div style="margin-top:18px;width:48px;height:1px;background:linear-gradient(90deg,transparent,#3a7ec4,transparent);animation:sl 1.2s ease-in-out infinite;"></div>
+</div>
+<style>@keyframes sl{0%,100%{opacity:.2}50%{opacity:1}}</style>
+<script>window.addEventListener('load',function(){setTimeout(function(){var s=document.getElementById('splash');if(!s)return;s.style.transition='opacity .5s ease';s.style.opacity='0';setTimeout(function(){s.remove();},550);},700);});</script>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+const F = ({label,children}) => <div className="field"><label>{label}</label>{children}</div>;
+
+function TTEditor({route, existing, onSave, onClose}) {
+  const stations = (route.objects||[]).filter(o => o.type==='STATION');
+  const [name,    setName]    = useState(existing?.name      || '');
+  const [zugNr,   setZugNr]   = useState(existing?.zugNummer || '');
+  const [zugTyp,  setZugTyp]  = useState(existing?.zugTyp    || '');
+  const [mode,    setMode]    = useState(existing?.mode      || 'TIME');
+  const [dep,     setDep]     = useState(existing?.departure || '');
+  const [avg,     setAvg]     = useState(String(existing?.avgSpeed || 100));
+  const [richtung,setRichtung]= useState(existing?.richtung ?? 1);
+  const [stops,   setStops]   = useState(() => {
+    if (existing) return existing.stops;
+    return stations.map(s => ({sid:s.id, km:s.km, name:s.name||'', served:true, arr:'', dep:''}));
+  });
+
+  // Hinweis: Halte die beim vorhandenen Fahrplan fehlen (neue Stationen im Editor)
+  const missingStops = !existing ? [] : stations.filter(s =>
+    !stops.find(st => st.sid === s.id)
+  );
+
+  const setSS = (sid, field, val) => setStops(ss => ss.map(s => s.sid===sid ? {...s,[field]:val} : s));
+
+  const addMissingStop = s => {
+    setStops(prev => [...prev, {sid:s.id, km:s.km, name:s.name||'', served:true, arr:'', dep:''}]
+      .sort((a,b) => a.km - b.km));
+  };
+
+  const save = () => {
+    const ae = checkReservedAuthor(zugNr);
+    if (ae) { alert(ae); return; }
+    onSave({
+      id:         existing?.id || Date.now().toString(),
+      name:       name.trim() || ('Fahrplan '+new Date().toLocaleTimeString('de-DE')),
+      zugNummer:  zugNr.trim(),
+      zugTyp:     zugTyp.trim(),
+      mode, departure: dep, avgSpeed: parseFloat(avg)||100,
+      richtung:   Number(richtung),
+      stops,
+      createdAt:  existing?.createdAt || new Date().toISOString(),
+    });
+  };
+
+  return (
+    <div className="ov" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="sheet">
+        <div className="sheet-h">{existing?'Fahrplan bearbeiten':'Neuer Fahrplan'}</div>
+
+        {missingStops.length > 0 && (
+          <div style={{background:'#1a1408',border:'1px solid #4a3810',borderRadius:3,padding:'8px 11px',marginBottom:10,fontSize:11,color:'#b89030',lineHeight:1.7}}>
+            ⚠ Neue Stationen im Editor, noch nicht im Fahrplan:{' '}
+            {missingStops.map(s => (
+              <button key={s.id} onClick={()=>addMissingStop(s)}
+                style={{marginLeft:4,background:'#2a2010',border:'1px solid #6a5020',borderRadius:2,color:'#d4a840',padding:'1px 7px',cursor:'pointer',fontSize:11}}>
+                + {s.name||'km '+s.km}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <F label="Bezeichnung (optional)">
+          <input className="inp" value={name} autoFocus onChange={e=>setName(e.target.value)}
+            placeholder={'Fahrplan '+new Date().toLocaleDateString('de-DE')}/>
+        </F>
+        <div className="irow">
+          <F label="Zugnummer"><input className="inp" value={zugNr} onChange={e=>setZugNr(e.target.value)} placeholder="z. B. RE 4711"/></F>
+          <F label="Zugtyp"><input className="inp" value={zugTyp} onChange={e=>setZugTyp(e.target.value)} placeholder="RE, IC, S…"/></F>
+        </div>
+        <div className="irow">
+          <F label="Abfahrtszeit HH:MM:SS"><input className="inp" value={dep} onChange={e=>setDep(e.target.value)} placeholder="10:00:00"/></F>
+          <F label="Richtung">
+            <select className="inp" value={richtung} onChange={e=>setRichtung(Number(e.target.value))}>
+              <option value={1}>Normal (km steigt)</option>
+              <option value={-1}>Umgekehrt (km fällt)</option>
+            </select>
+          </F>
+        </div>
+        <div className="irow">
+          <F label="Berechnungsmodus">
+            <select className="inp" value={mode} onChange={e=>setMode(e.target.value)}>
+              <option value="TIME">Zeitbasiert (Fahrplan)</option>
+              <option value="SPEED">Ø-Geschwindigkeit</option>
+            </select>
+          </F>
+          {mode==='SPEED' && (
+            <F label="Ø-Geschwindigkeit km/h">
+              <input className="inp" type="number" value={avg} onChange={e=>setAvg(e.target.value)}/>
+            </F>
+          )}
+        </div>
+
+        <div style={{fontFamily:'var(--mono)',fontSize:9,color:'var(--faint)',textTransform:'uppercase',letterSpacing:1,marginBottom:8}}>Halte</div>
+        {stops.map(s => (
+          <div key={s.sid} className="stop-row">
+            <label className="chk">
+              <input type="checkbox" checked={!!s.served} onChange={e=>setSS(s.sid,'served',e.target.checked)}/>
+              <span style={{fontWeight:600}}>{s.name}</span>
+              <span style={{fontFamily:'var(--mono)',fontSize:10,color:'var(--faint)',marginLeft:4}}>km {s.km.toFixed(3)}</span>
+            </label>
+            {s.served && mode==='TIME' && (
+              <div className="irow" style={{marginTop:6,paddingLeft:21}}>
+                <F label="Ankunft HH:MM:SS"><input className="inp" value={s.arr} onChange={e=>setSS(s.sid,'arr',e.target.value)} placeholder="HH:MM:SS"/></F>
+                <F label="Abfahrt HH:MM:SS"><input className="inp" value={s.dep} onChange={e=>setSS(s.sid,'dep',e.target.value)} placeholder="HH:MM:SS"/></F>
+              </div>
+            )}
+          </div>
+        ))}
+
+        <div className="sheet-f">
+          <button className="btn bo" onClick={onClose}>Abbrechen</button>
+          <button className="btn bp" onClick={save}>Speichern</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Fahrplaene() {
+  const [route, setRoute]       = useState(null);
+  const [showEditor, setShowEd] = useState(false);
+  const [editTT, setEditTT]     = useState(null);
+
+  useEffect(() => {
+    const id = decodeURIComponent(window.location.hash.replace('#',''));
+    if (id) setRoute(DB.getById(id));
+  }, []);
+
+  const refresh = () => setRoute(r => DB.getById(r.id));
+
+  const saveTT = tt => {
+    DB.saveTimetable(route.id, tt);
+    refresh(); setShowEd(false); setEditTT(null);
+  };
+  const delTT = id => {
+    if (!confirm('Fahrplan löschen?')) return;
+    DB.deleteTimetable(route.id, id);
+    refresh();
+  };
+  const openAnsicht = tt => {
+    DB.setActiveTTId(route.id, tt.id);
+    const hash = encodeURIComponent(route.name.toLowerCase().replace(/\s+/g,'-'));
+    window.location.href = `../ansicht/#${hash}`;
+  };
+
+  if (!route) return (
+    <div style={{display:'flex',height:'100dvh',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:12,color:'var(--faint)',fontFamily:'var(--mono)',fontSize:12}}>
+      <div>Keine Strecke geladen.</div>
+      <button onClick={()=>window.location.href='../'} style={{background:'var(--s1)',border:'1px solid var(--b1)',borderRadius:3,color:'var(--dim)',padding:'6px 14px',cursor:'pointer',fontFamily:'var(--mono)',fontSize:11}}>← Zurück</button>
+    </div>
+  );
+
+  const tts = route.timetables||[];
+
+  return (
+    <div className="page">
+      <div className="bar">
+        <button className="ic" onClick={()=>window.location.href='../'}>←</button>
+        <span style={{flex:1,fontWeight:600,fontSize:13,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{route.name}</span>
+        <span className="bar-lbl">Fahrpläne</span>
+      </div>
+
+      <div className="scroll">
+        {tts.length===0 ? (
+          <div className="empty"><div style={{fontSize:12}}>Noch keine Fahrpläne — + drücken</div></div>
+        ) : tts.map((tt, i) => (
+          <div className="rcard" key={tt.id}>
+            <div className="rcard-h">
+              <div className="rcard-n">
+                {tt.zugNummer && <span style={{fontFamily:'var(--mono)',color:'var(--acc)',marginRight:8,fontSize:13}}>{tt.zugNummer}</span>}
+                {tt.name}
+              </div>
+              <div className="rcard-m">
+                {tt.zugTyp && <>{tt.zugTyp} · </>}
+                {tt.richtung === -1 ? '⇐ umgekehrt · ' : ''}
+                {tt.mode==='TIME' ? 'Zeitbasiert' : `Ø ${tt.avgSpeed} km/h`} · ab {tt.departure||'–'} · {(tt.stops||[]).filter(s=>s.served).length} Halte
+                {tt.createdAt && ` · ${new Date(tt.createdAt).toLocaleDateString('de-DE')}`}
+                {' · Nr. '}<span style={{color:'var(--pri)'}}>{i+1}</span>
+              </div>
+            </div>
+            <div className="rcard-a">
+              <button className="btn bp bsm" onClick={()=>openAnsicht(tt)}>▶ Fahrt starten</button>
+              <button className="btn bo bsm" onClick={()=>{setEditTT(tt);setShowEd(true);}}>Bearbeiten</button>
+              <button className="btn bx bsm" style={{marginLeft:'auto'}} onClick={()=>delTT(tt.id)}>✕</button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <button className="fab" onClick={()=>{setEditTT(null);setShowEd(true);}}>+</button>
+
+      {showEditor && (
+        <TTEditor route={route} existing={editTT}
+          onSave={saveTT} onClose={()=>{setShowEd(false);setEditTT(null);}}/>
+      )}
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<Fahrplaene/>);
+</script>
+</body>
+</html>
