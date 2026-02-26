@@ -1,0 +1,524 @@
+<!--
+  Project:     CCMC™ Web EBuLa
+  Part of:     CraftCraftMine Netzwerk™ (CCMN™)
+  Copyright:   (c) 2026 CraftCraftMine Netzwerk™ – All rights reserved.
+  Description: Privates Hobby-Projekt für Train Sim World Simulationen.
+               Nicht für kommerzielle Zwecke bestimmt.
+  Info:        https://craftcraftmine.net/ueberuns
+-->
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>CCMC™ Web EBuLa – Tutorial</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="../shared/types.js"></script>
+<script src="../shared/db.js"></script>
+<script src="../shared/calc.js"></script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+:root{
+  --bg:#09090d;--s1:#111116;--s2:#16161d;--s3:#1d1d26;
+  --b1:#252532;--b2:#303040;
+  --text:#c4c4d6;--dim:#686880;--faint:#30303f;
+  --pri:#3a7ec4;--pri2:#1e4f88;--acc:#b89030;--red:#b03030;--grn:#38b060;
+  --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body,#root{height:100%;overflow:hidden;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);}
+::-webkit-scrollbar{width:3px;} ::-webkit-scrollbar-thumb{background:var(--b2);}
+.page{display:flex;flex-direction:column;height:100dvh;}
+.bar{display:flex;align-items:center;gap:9px;padding:0 13px;height:44px;background:var(--s1);border-bottom:1px solid var(--b1);flex-shrink:0;}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:0 12px;height:30px;border-radius:3px;border:none;cursor:pointer;font-family:var(--sans);font-size:12px;font-weight:500;white-space:nowrap;}
+.bp{background:var(--pri2);color:#b8d4f0;border:1px solid #3a7ec440;} .bp:hover{background:var(--pri);color:#fff;}
+.bo{background:transparent;color:var(--dim);border:1px solid var(--b2);} .bo:hover{background:var(--s3);color:var(--text);}
+.bsm{height:26px;padding:0 9px;font-size:11px;}
+.ic{width:28px;height:28px;border-radius:3px;background:transparent;border:1px solid var(--b1);cursor:pointer;color:var(--dim);font-size:14px;display:inline-flex;align-items:center;justify-content:center;}
+.ic:hover{background:var(--s3);color:var(--text);}
+.scroll{flex:1;overflow-y:auto;padding:16px 14px 32px;}
+
+/* ── Kapitel-Karten ── */
+.ch{background:var(--s1);border:1px solid var(--b1);border-radius:6px;margin-bottom:10px;overflow:hidden;}
+.ch-h{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;user-select:none;}
+.ch-num{
+  width:26px;height:26px;border-radius:50%;border:1.5px solid var(--pri2);
+  font-family:var(--mono);font-size:11px;color:var(--pri);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.ch-title{font-size:13px;font-weight:600;flex:1;}
+.ch-body{padding:0 14px 14px;}
+
+/* ── Inhalt ── */
+.p{font-size:12px;color:var(--dim);line-height:1.75;margin-bottom:10px;}
+.p:last-child{margin-bottom:0;}
+.sec{font-family:var(--mono);font-size:9px;color:var(--pri);letter-spacing:1px;text-transform:uppercase;margin:14px 0 6px;}
+.sec:first-child{margin-top:0;}
+.kbtable{width:100%;border-collapse:collapse;margin-bottom:10px;}
+.kbtable td{padding:4px 8px;font-size:11px;border-bottom:1px solid var(--b1);vertical-align:top;}
+.kbtable td:first-child{font-family:var(--mono);color:var(--acc);width:70px;flex-shrink:0;white-space:nowrap;}
+.kbtable tr:last-child td{border-bottom:none;}
+.kbtable tr:hover td{background:var(--s2);}
+.note{background:#1a1408;border:1px solid #3a2808;border-radius:3px;padding:8px 11px;font-size:11px;color:#c8a030;line-height:1.65;margin-bottom:10px;}
+.tip{background:#081408;border:1px solid #1a3818;border-radius:3px;padding:8px 11px;font-size:11px;color:#4a9a5a;line-height:1.65;margin-bottom:10px;}
+.code{background:var(--bg);border:1px solid var(--b1);border-radius:3px;padding:10px;font-family:var(--mono);font-size:10px;color:var(--faint);white-space:pre-wrap;margin-bottom:10px;line-height:1.6;}
+.divider{height:1px;background:var(--b1);margin:12px 0;}
+
+/* ── Live-Demo ── */
+.demo-wrap{background:#0b0b0e;border:1px solid #2a2a2a;border-radius:6px;overflow:hidden;margin-bottom:10px;}
+.demo-hdr{display:grid;grid-template-columns:58px 1fr 100px 80px;border-bottom:1px solid #1a1a1a;background:#070707;}
+.demo-hc{padding:3px 6px;font-size:10px;border-right:1px solid #1a1a1a;font-family:'IBM Plex Mono',monospace;}
+.demo-hc:last-child{border-right:none;}
+.demo-info{display:flex;gap:10px;padding:2px 6px;border-bottom:1px solid #111;background:#040404;font-size:9px;font-family:'IBM Plex Mono',monospace;}
+.demo-row{display:grid;grid-template-columns:44px 18px 44px 1fr 62px 62px;border-bottom:1px solid #0e0e0e;}
+.dc{padding:2px 4px;font-size:10px;border-right:1px solid #111;display:flex;align-items:center;font-family:'IBM Plex Mono',monospace;}
+.dc:last-child{border-right:none;}
+.demo-sbar{display:flex;gap:6px;padding:2px 6px;border-top:1px solid #111;background:#030303;font-size:8px;font-family:'IBM Plex Mono',monospace;}
+.demo-sp{background:#080808;border:1px solid #181818;border-radius:2px;padding:1px 5px;color:#3a3a3a;}
+.demo-sk-bar{display:flex;background:#030303;border-top:1px solid #111;height:14px;}
+.demo-sk-sp{width:38px;flex-shrink:0;}
+.demo-sk-lbl{flex:1;display:flex;align-items:center;justify-content:center;font-size:6px;font-family:'IBM Plex Mono',monospace;color:#2a4a2a;}
+.demo-bot{display:flex;gap:2px;padding:2px 5px;background:#1a1a1a;border-top:1px solid #2a2a2a;}
+.demo-nbtn{width:28px;height:22px;background:#282828;border:1px solid #333;border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:9px;font-family:'IBM Plex Mono',monospace;color:#555;flex-shrink:0;}
+.demo-nbtn.on{color:#3a7ec4;}
+</style>
+</head>
+<body>
+<div id="splash" style="position:fixed;inset:0;background:#09090d;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;font-family:'IBM Plex Mono',monospace;">
+  <div style="font-size:20px;font-weight:600;color:#3a7ec4;letter-spacing:3px;">CCMC™ Web EBuLa</div>
+  <div style="font-size:10px;color:#2a4a6a;letter-spacing:2px;">powered by CraftCraftMine Netzwerk™</div>
+  <div style="margin-top:18px;width:48px;height:1px;background:linear-gradient(90deg,transparent,#3a7ec4,transparent);animation:sl 1.2s ease-in-out infinite;"></div>
+</div>
+<style>@keyframes sl{0%,100%{opacity:.2}50%{opacity:1}}</style>
+<script>window.addEventListener('load',function(){setTimeout(function(){var s=document.getElementById('splash');if(!s)return;s.style.transition='opacity .5s ease';s.style.opacity='0';setTimeout(function(){s.remove();},550);},700);});</script>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+/* ── Live-Demo Komponente ── */
+function LiveDemo() {
+  const [pct, setPct] = useState(0.25);
+  const ref = useRef(null);
+  const items = DEMO_ROUTE.objects.slice(0, 8);
+  const served = DEMO_ROUTE.timetables[0].stops;
+  const SK_LBLS = ['Zug','FSD','St','GW','Zeit','','GNT','V','','Nacht'];
+
+  useEffect(() => {
+    ref.current = setInterval(() => setPct(p => p >= 1 ? 0 : p + 0.003), 100);
+    return () => clearInterval(ref.current);
+  }, []);
+
+  const curKm = DEMO_ROUTE.startKm + (DEMO_ROUTE.endKm - DEMO_ROUTE.startKm) * pct;
+  const next   = served.filter(s => s.km > curKm).sort((a,b) => a.km - b.km)[0];
+  const prog   = Math.max(0, Math.min(1, (curKm - DEMO_ROUTE.startKm) / (DEMO_ROUTE.endKm - DEMO_ROUTE.startKm)));
+  const hh = Math.floor(10 + pct * 0.43), mm = Math.floor((pct * 26) % 60);
+  const timeStr = `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}:${String(Math.floor(pct*1560)%60).padStart(2,'0')}`;
+
+  const visItems = [...items].sort((a,b) => b.km - a.km);
+
+  return (
+    <div className="demo-wrap">
+      {/* Header */}
+      <div className="demo-hdr">
+        <div className="demo-hc" style={{color:'#444',fontSize:9}}>2026</div>
+        <div className="demo-hc" style={{color:'#3a9a50',fontSize:9}}>RE 4711 · Demo</div>
+        <div className="demo-hc" style={{color:'#444',fontSize:9,justifyContent:'flex-end',display:'flex'}}>22.02.2026</div>
+        <div className="demo-hc" style={{color:'#c8c8d8',fontWeight:600,fontSize:11}}>{timeStr}</div>
+      </div>
+      {/* Info */}
+      <div className="demo-info">
+        <span style={{color:'#3a7ec4',fontWeight:600}}>km {curKm.toFixed(1)} /r</span>
+        <span style={{color:'#555'}}>{next ? `→ ${next.name} · ${(next.km-curKm).toFixed(1)} km` : 'Ziel erreicht'}</span>
+      </div>
+      {/* Fortschritt */}
+      <div style={{height:1,background:'#080808'}}><div style={{height:1,width:prog*100+'%',background:'#182818'}}/></div>
+      {/* Kopfzeile */}
+      <div className="demo-row" style={{background:'#0a0a0a'}}>
+        {['V','','km','Bezeichnung','an','ab'].map((h,i) => (
+          <div key={i} className="dc" style={{color:'#2a2a2a',fontSize:8,justifyContent:i===3?'flex-start':'center'}}>{h}</div>
+        ))}
+      </div>
+      {/* Zeilen */}
+      {visItems.map((item, i) => {
+        const isSta  = item.type === 'STATION';
+        const h      = isSta ? 38 : 20;
+        const passed = item.km < curKm - 0.1;
+        const isCur  = Math.abs(item.km - curKm) < 0.1;
+        const ttStop = served.find(s => s.sid === item.id);
+        return (
+          <div key={item.id} className="demo-row" style={{height:h, opacity:passed?0.35:1, background:isCur?'#081408':'transparent'}}>
+            {/* V */}
+            <div className="dc" style={{justifyContent:'flex-end'}}>
+              {item.type==='SPEED' && <span style={{color:'#a89020',fontSize:9,fontWeight:600}}>{item.speed}</span>}
+              {item.type==='LA'    && <span style={{color:'#b03030',fontSize:9,fontWeight:600}}>La {item.speed}</span>}
+            </div>
+            {/* Gleis */}
+            <div className="dc" style={{justifyContent:'center',position:'relative'}}>
+              <div style={{position:'absolute',top:0,bottom:0,width:2,left:'50%',transform:'translateX(-50%)',background:passed?'#0e0e0e':isCur?'#38b060':'#222'}}/>
+              {isSta && <div style={{width:isCur?10:7,height:isCur?10:7,borderRadius:'50%',background:passed?'#181818':'#c4c4d6',position:'relative',zIndex:2,border:`1.5px solid ${isCur?'#38b060':'#000'}`}}/>}
+              {isCur && <div style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%) rotate(45deg)',width:8,height:8,background:'#38b060',border:'1.5px solid #000',zIndex:10}}/>}
+            </div>
+            {/* km */}
+            <div className="dc" style={{justifyContent:'flex-end',color:isCur?'#38b060':'#3a3a3a',fontSize:9}}>{item.km.toFixed(1)}</div>
+            {/* Name */}
+            <div className="dc" style={{fontSize:isSta?10:9,color:passed?'#282828':isSta?'#c4c4d6':'#484848',fontWeight:isSta?600:400,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>
+              {item.name||TYPES[item.type]?.l}
+            </div>
+            {/* an */}
+            <div className="dc" style={{flexDirection:'column',alignItems:'center',justifyContent:'center',gap:1}}>
+              {ttStop?.arr && <span style={{color:'#b89030',fontSize:8}}>{ttStop.arr}</span>}
+            </div>
+            {/* ab */}
+            <div className="dc" style={{flexDirection:'column',alignItems:'center',justifyContent:'center',gap:1}}>
+              {ttStop?.dep && <span style={{color:'#b89030',fontSize:8}}>{ttStop.dep}</span>}
+            </div>
+          </div>
+        );
+      })}
+      {/* Status-Bar */}
+      <div className="demo-sbar">
+        <span className="demo-sp">/r ↓</span>
+        <span className="demo-sp" style={{color:'#3a7ec4'}}>km {curKm.toFixed(3)}</span>
+        <span className="demo-sp">GSM-R</span>
+        <span style={{marginLeft:'auto',color:'#1a2a1a',fontSize:8}}>○</span>
+      </div>
+      {/* Softkey-Labels */}
+      <div className="demo-sk-bar">
+        <div className="demo-sk-sp"/>
+        {SK_LBLS.map((l,i) => (
+          <div key={i} className="demo-sk-lbl">{l}</div>
+        ))}
+        <div style={{flex:1}}/>
+      </div>
+      {/* Numpad */}
+      <div className="demo-bot">
+        <div className="demo-nbtn" style={{width:34,color:'#3a7ec4',fontSize:11}}>▶</div>
+        {[1,2,3,4,5,6,7,8,9,0].map(n => (
+          <div key={n} className="demo-nbtn">{n}</div>
+        ))}
+        <div className="demo-nbtn" style={{fontSize:8}}>⊙</div>
+        <div className="demo-nbtn" style={{fontSize:8}}>↺</div>
+        <div style={{marginLeft:'auto',padding:'1px 5px',background:'#070707',border:'1px solid #1a1a1a',borderRadius:2,fontSize:7,color:'#1e3450',fontFamily:'IBM Plex Mono',lineHeight:1.4,alignSelf:'center'}}>CCMC™<br/>EBuLa</div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Tastenkürzel-Tabelle ── */
+function KbRow({k, desc}) {
+  return (
+    <tr>
+      <td>{k}</td>
+      <td style={{color:'var(--dim)'}}>{desc}</td>
+    </tr>
+  );
+}
+
+/* ── Kapitel ── */
+function Chapter({ num, title, children, defaultOpen }) {
+  const [open, setOpen] = useState(!!defaultOpen);
+  return (
+    <div className="ch">
+      <div className="ch-h" onClick={() => setOpen(o => !o)}>
+        <div className="ch-num">{num}</div>
+        <div className="ch-title">{title}</div>
+        <span style={{color:'var(--faint)',fontSize:13}}>{open ? '▲' : '▼'}</span>
+      </div>
+      {open && <div className="ch-body">{children}</div>}
+    </div>
+  );
+}
+
+function TutorialPage() {
+  const done = () => { DB.markTut(); window.location.href = '../'; };
+
+  return (
+    <div className="page">
+      <div className="bar">
+        <button className="ic" onClick={() => window.location.href = '../'}>←</button>
+        <span style={{flex:1,fontFamily:'var(--mono)',fontSize:11,letterSpacing:2,color:'var(--pri)'}}>CCMC™ EBULA — TUTORIAL</span>
+        <button className="btn bp bsm" onClick={done}>Fertig →</button>
+      </div>
+
+      <div className="scroll">
+
+        <div style={{marginBottom:14,padding:'10px 12px',background:'var(--s1)',border:'1px solid var(--b1)',borderRadius:6}}>
+          <div style={{fontFamily:'var(--mono)',fontSize:9,color:'var(--pri)',marginBottom:5,letterSpacing:1}}>CCMC™ WEB EBULA — BEDIENUNGSANLEITUNG</div>
+          <div style={{fontSize:12,color:'var(--dim)',lineHeight:1.7}}>
+            Ein simuliertes digitales Buchfahrplansystem (BFS) für Train Sim World Fahrten.
+            Tippe auf ein Kapitel um es zu öffnen.
+          </div>
+        </div>
+
+        {/* ═══════════════════════════════════════ */}
+        <Chapter num="1" title="Überblick &amp; Startseite" defaultOpen>
+          <div className="p">
+            Die App besteht aus vier Bereichen: <strong>Startseite</strong>, <strong>Editor</strong>, <strong>Fahrpläne</strong> und <strong>Ansicht</strong>.
+            Der typische Ablauf: Strecke anlegen → Objekte eintragen → Fahrplan erstellen → Ansicht öffnen und fahren.
+          </div>
+          <div className="sec">Startseite — Menü (☰)</div>
+          <table className="kbtable">
+            <tbody>
+              <KbRow k="Import"       desc="Lokale JSON-Datei importieren"/>
+              <KbRow k="GitHub"       desc="Strecken aus dem öffentlichen Repo laden — alle .json Dateien werden automatisch gefunden"/>
+              <KbRow k="Demo-Strecke" desc="Testroute mit allen Objekttypen hinzufügen"/>
+              <KbRow k="Tutorial"     desc="Diese Anleitung neu starten"/>
+            </tbody>
+          </table>
+          <div className="tip">
+            ✓ Strecken können exportiert (JSON) und mit anderen geteilt werden. Import-Dateien werden automatisch auf die aktuelle Version migriert — kein Datenverlust.
+          </div>
+        </Chapter>
+
+        {/* ═══════════════════════════════════════ */}
+        <Chapter num="2" title="Strecken &amp; Editor">
+          <div className="sec">Neue Strecke</div>
+          <div className="p">
+            + auf der Startseite → Pflichtfeld: <strong>Name</strong>. Optional: Beschreibung, Start-/End-km, Autor, Strecken-Nr., Fahrzeugtyp, Spurweite.
+          </div>
+
+          <div className="sec">Objekttypen im Editor</div>
+          <table className="kbtable">
+            <tbody>
+              <KbRow k="Bf"   desc="Bahnhof / Haltepunkt — Gleise können angegeben werden (Gl. 1, Gl. 2 …)"/>
+              <KbRow k="V"    desc="Geschwindigkeitswechsel — Wert in km/h"/>
+              <KbRow k="La"   desc="Langsamfahrstelle — mit Geschwindigkeit und Ende-km"/>
+              <KbRow k="BÜ"  desc="Bahnübergang"/>
+              <KbRow k="Sig"  desc="Signal (Einfahrt / Ausfahrt)"/>
+              <KbRow k="Tu▸" desc="Tunnelanfang"/>
+              <KbRow k="▸Tu" desc="Tunnelende"/>
+              <KbRow k="‰"   desc="Steigung (positiv) oder Gefälle (negativ, z. B. −12)"/>
+            </tbody>
+          </table>
+
+          <div className="sec">Hin- und Rück-Richtung</div>
+          <div className="p">
+            Im Editor gibt es zwei Tabs: <strong>↓ HIN</strong> und <strong>↑ RÜCK</strong>.
+            Die Rück-Richtung wird beim ersten Öffnen als Kopie von Hin erstellt und kann dann unabhängig bearbeitet werden —
+            z. B. andere Gleise, andere Signale.
+          </div>
+          <div className="tip">
+            ✓ Stationen können Gleise erhalten (Name + optionale km-Position). Diese Gleise sind dann im Fahrplan-Editor wählbar.
+          </div>
+        </Chapter>
+
+        {/* ═══════════════════════════════════════ */}
+        <Chapter num="3" title="Fahrpläne">
+          <div className="sec">Neuer Fahrplan</div>
+          <div className="p">
+            Über „Fahrpläne" auf der Streckenkarte. Pro Strecke können beliebig viele Fahrpläne existieren.
+          </div>
+          <table className="kbtable">
+            <tbody>
+              <KbRow k="Fahrplan-Nr." desc="Kurze Zahl (z. B. 9001) — damit lädst du den Fahrplan direkt in der EBuLa-Ansicht über die Numpad-Taste 1"/>
+              <KbRow k="Zugnummer"    desc="z. B. RE 4711 — auch suchbar in der Ansicht"/>
+              <KbRow k="Zugtyp"       desc="RE, IC, S, RB … (nur zur Anzeige)"/>
+              <KbRow k="Abfahrtszeit" desc="HH:MM:SS — Startzeit der Fahrt"/>
+              <KbRow k="Richtung"     desc="Hin oder Rück (bestimmt welche Objektliste genutzt wird)"/>
+              <KbRow k="Modus"        desc="Zeitbasiert (Fahrplan mit Ankerpunkten) oder Ø-Geschwindigkeit (linear)"/>
+            </tbody>
+          </table>
+
+          <div className="sec">Halte &amp; Gleise</div>
+          <div className="p">
+            Für jeden bedienten Halt kann <strong>Ankunft und Abfahrt (HH:MM:SS)</strong> eingetragen werden.
+            Wenn an der Station Gleise definiert sind, erscheint ein Dropdown zur Gleis-Auswahl —
+            wählt man ein Gleis mit eigener km-Position, verschiebt sich der Haltepunkt entsprechend.
+          </div>
+          <div className="note">
+            ⚠ Neue Stationen die nach dem Fahrplan im Editor hinzugefügt wurden, erscheinen als gelbe Warnung
+            mit einem „+" Button um sie schnell hinzuzufügen.
+          </div>
+        </Chapter>
+
+        {/* ═══════════════════════════════════════ */}
+        <Chapter num="4" title="EBuLa-Ansicht — Layout">
+          <div className="p">So sieht die Ansicht aus — die Raute ◆ wandert mit dem Timer mit:</div>
+          <LiveDemo/>
+          <div className="sec">Spalten im Buchfahrplan-Streifen</div>
+          <table className="kbtable">
+            <tbody>
+              <KbRow k="[V]"       desc="Geschwindigkeitsklammer mit Wert und seitlicher Linie"/>
+              <KbRow k="[▏]"       desc="Gleislinie — Bahnhöfe als Punkt, aktuelle Position als ◆"/>
+              <KbRow k="[km]"      desc="km-Position des Objekts"/>
+              <KbRow k="[Name]"    desc="Bezeichnung — bei Stationen auch Gleis, bei Gefälle ↗/↘‰"/>
+              <KbRow k="[an]"      desc="Ankunftszeit HH:MM:SS — darunter Verspätungsvorschau (rot/grün)"/>
+              <KbRow k="[ab]"      desc="Abfahrtszeit HH:MM:SS — darunter Verspätungsvorschau"/>
+            </tbody>
+          </table>
+          <div className="tip">
+            ✓ Vergangene Objekte werden auf 38% Deckkraft gedimmt.
+            Die aktuelle Position (◆) liegt immer bei etwa 65% vom oberen Displayrand.
+            An den Streckenenden wandert sie natürlich nach oben oder unten.
+          </div>
+        </Chapter>
+
+        {/* ═══════════════════════════════════════ */}
+        <Chapter num="5" title="EBuLa-Ansicht — Bedienung">
+          <div className="sec">Obere Buttons</div>
+          <table className="kbtable">
+            <tbody>
+              <KbRow k="☀ (links)"   desc="Display an/aus (andere Buttons bleiben bedienbar)"/>
+              <KbRow k="S"           desc="Streckeninfo-Overlay"/>
+              <KbRow k="i"           desc="Info zum Objekt an aktueller Position"/>
+              <KbRow k="St"          desc="Störungsmeldung eingeben (erscheint rot in der Statusleiste)"/>
+              <KbRow k="-5s / +5s"   desc="Verspätung anpassen — nur die Anzeige, nicht die gespeicherte Zeit"/>
+              <KbRow k="V&gt;0"     desc="Geschwindigkeitsbeschränkungen ein/aus"/>
+              <KbRow k="V=0"         desc="Nur Stationen anzeigen"/>
+              <KbRow k="◑"           desc="Nachtmodus (Grün-Filter wie echte EBuLa-Displays)"/>
+              <KbRow k="UD"          desc="Fahrtrichtung umkehren — für Rückfahrten"/>
+              <KbRow k="⛶"          desc="Vollbild-Modus"/>
+              <KbRow k="☀ / ☼"      desc="Helligkeit erhöhen / verringern"/>
+            </tbody>
+          </table>
+
+          <div className="sec">Rechte Seite</div>
+          <table className="kbtable">
+            <tbody>
+              <KbRow k="C"  desc="Overlay schließen / Eingabe abbrechen / zurück zur Startseite"/>
+              <KbRow k="◄ ►" desc="Manuell scrollen (deaktiviert Auto-Scroll)"/>
+              <KbRow k="▲ ▼" desc="km-Versatz ±0,1 km (zum Feinabgleich)"/>
+              <KbRow k="E"  desc="Auto-Scroll ein/aus · Overlay bestätigen"/>
+            </tbody>
+          </table>
+
+          <div className="sec">Numpad (1–0) — Softkeys</div>
+          <div className="p">
+            Die Labels direkt über dem Numpad zeigen was jede Taste gerade tut.
+            Im normalen Modus sind es Funktionstasten, im Eingabe-Modus werden Ziffern eingegeben.
+          </div>
+          <table className="kbtable">
+            <tbody>
+              <KbRow k="[1] Zug"   desc="Fahrplan-Nr. oder Zugnummer eingeben → Fahrplan laden"/>
+              <KbRow k="[2] FSD"   desc="Streckeninfo-Overlay öffnen"/>
+              <KbRow k="[3] St"    desc="Störungsmeldung"/>
+              <KbRow k="[4] GW"    desc="Gegengleis (/l) / Regelgleis (/r) umschalten"/>
+              <KbRow k="[5] Zeit"  desc="Uhrzeit manuell setzen (Format: HHMMSS)"/>
+              <KbRow k="[7] GNT"   desc="Nur Stationen anzeigen (Geschwindigkeiten ausblenden)"/>
+              <KbRow k="[8] V"     desc="Geschwindigkeitsbeschränkungen ein/aus"/>
+              <KbRow k="[0] Nacht" desc="Nachtmodus umschalten"/>
+              <KbRow k="⊙"        desc="Auto-Scroll ein/aus"/>
+              <KbRow k="↺"        desc="km-Versatz und Verspätung zurücksetzen"/>
+            </tbody>
+          </table>
+
+          <div className="note">
+            ⚠ Die Ansicht startet immer leer — kein automatisches Laden der letzten Fahrt.
+            Taste <strong>1</strong> drücken, Fahrplan-Nr. eingeben, <strong>E</strong> bestätigen.
+          </div>
+        </Chapter>
+
+        {/* ═══════════════════════════════════════ */}
+        <Chapter num="6" title="Verspätung &amp; Zeitsteuerung">
+          <div className="sec">Verspätung anpassen</div>
+          <div className="p">
+            Mit <strong>-5s / +5s</strong> (oben) oder per Softkey passt du die Verspätung an.
+            Der interne Zeittakt läuft unverändert — der Verspätungswert verschiebt nur die km-Berechnung.
+          </div>
+
+          <div className="sec">Verspätungsvorschau</div>
+          <div className="p">
+            Unter jeder Ankunfts- und Abfahrtszeit erscheint (wenn Verspätung ≠ 0) die voraussichtliche Zeit:
+          </div>
+          <table className="kbtable">
+            <tbody>
+              <KbRow k="rot"   desc="Verspätung: Zug kommt/fährt später als geplant"/>
+              <KbRow k="grün"  desc="Verspätung aufgeholt: Zug fährt früher als vorhergesagt"/>
+            </tbody>
+          </table>
+          <div className="tip">
+            ✓ Mindestaufenthalt: 10 Sekunden. Hat der Zug Verspätung aber der geplante Aufenthalt ist lang genug,
+            kann er pünktlich abfahren — die Vorschau zeigt dies automatisch an.
+          </div>
+
+          <div className="sec">Zeit manuell setzen</div>
+          <div className="p">
+            Taste <strong>5 (Zeit)</strong> → Ziffern eingeben → <strong>E</strong> bestätigen.
+            Format: <strong>HHMMSS</strong> — also 143000 für 14:30:00.
+          </div>
+        </Chapter>
+
+        {/* ═══════════════════════════════════════ */}
+        <Chapter num="7" title="Speicherpunkt &amp; Darstellung">
+          <div className="sec">Speicherpunkt</div>
+          <div className="p">
+            Ganz rechts in der Statusleiste befindet sich ein kleines <strong>○</strong> (bzw. <strong>●</strong> wenn ein Punkt gesichert ist).
+            Antippen öffnet ein Menü:
+          </div>
+          <table className="kbtable">
+            <tbody>
+              <KbRow k="● Sichern"  desc="Aktuelle Position, Zeit, Verspätung und Richtung speichern"/>
+              <KbRow k="⏮ Laden"   desc="Gespeicherten Punkt wiederherstellen (nur sichtbar wenn Punkt vorhanden)"/>
+              <KbRow k="✕ Löschen" desc="Gespeicherten Punkt löschen"/>
+            </tbody>
+          </table>
+          <div className="tip">
+            ✓ Der Speicherpunkt überlebt Browser-Neustarts. Ideal um eine Fahrt später fortzusetzen.
+          </div>
+
+          <div className="sec">Darstellung anpassen</div>
+          <div className="p">
+            Das <strong>CCMC™ Web EBuLa</strong> Label unten rechts öffnet das Darstellungs-Overlay:
+          </div>
+          <table className="kbtable">
+            <tbody>
+              <KbRow k="Anzeigegröße" desc="70 – 150 % — ideal für Tablets zum Feinabstimmen"/>
+              <KbRow k="Helligkeit"   desc="30 – 160 %"/>
+              <KbRow k="Kontrast"     desc="50 – 200 %"/>
+            </tbody>
+          </table>
+          <div className="p">Alle Einstellungen werden automatisch gespeichert und beim nächsten Start wiederhergestellt.</div>
+        </Chapter>
+
+        {/* ═══════════════════════════════════════ */}
+        <Chapter num="8" title="GitHub-Repo &amp; Import/Export">
+          <div className="sec">Eigene Strecken teilen</div>
+          <div className="p">
+            „Export" auf der Streckenkarte lädt eine JSON-Datei herunter.
+            Diese Datei in ein <strong>öffentliches GitHub-Repo</strong> legen — fertig.
+            Die EBuLa-App findet alle <code>.json</code> Dateien automatisch über die GitHub Contents API.
+            Eine <code>index.json</code> ist nicht mehr nötig.
+          </div>
+          <div className="code">{`ebula-routes/          ← Repo-Root
+├── Bielefeld-Muenster.json
+├── Maintalbahn.json
+└── (weitere .json Dateien)`}</div>
+
+          <div className="sec">Import</div>
+          <div className="p">
+            Über <strong>☰ → GitHub</strong> auf der Startseite. Bereits importierte Strecken zeigen „Aktualisieren"
+            — beim Aktualisieren wird die bestehende Route überschrieben ohne die ID zu ändern.
+          </div>
+          <div className="tip">
+            ✓ Strecken können auch lokal importiert werden (☰ → Import → .json Datei wählen).
+          </div>
+        </Chapter>
+
+        {/* ── Footer ── */}
+        <div style={{marginTop:14,display:'flex',gap:8,flexWrap:'wrap',alignItems:'center'}}>
+          <button className="btn bp" onClick={done}>Tutorial abschließen &amp; zurück →</button>
+          <button className="btn bo bsm" onClick={()=>{
+            const r = DB.migrate({...DEMO_ROUTE, id:Date.now().toString()});
+            DB.save(r);
+            alert('Demo-Strecke „'+r.name+'" wurde hinzugefügt.');
+          }}>Demo-Strecke laden</button>
+        </div>
+
+        <div style={{marginTop:16,fontFamily:'var(--mono)',fontSize:9,color:'var(--faint)',lineHeight:1.8}}>
+          CCMC™ Web EBuLa · CraftCraftMine Netzwerk™<br/>
+          Privates Hobby-Projekt für Train Sim World · Nicht für kommerzielle Zwecke<br/>
+          © 2026 CraftCraftMine Netzwerk™
+        </div>
+        <div style={{height:16}}/>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<TutorialPage/>);
+</script>
+</body>
+</html>
