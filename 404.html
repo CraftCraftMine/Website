@@ -12,59 +12,88 @@
          * Copyright:   (c) 2026 CraftCraftMine Network™ – All rights reserved.
          */
         :root { --ccmn-bg: #09090d; --ccmn-accent: #3b82f6; }
-        body { background-color: var(--ccmn-bg); color: #f1f5f9; font-family: 'IBM Plex Mono', monospace; margin: 0; overflow: hidden; height: 100vh; width: 100vw; }
         
-        /* Vollbild-Effekte */
-        .scanlines { position: fixed; inset: 0; background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.1) 50%); background-size: 100% 4px; z-index: 100; pointer-events: none; }
-        #color-bars { position: fixed; inset: 0; background: linear-gradient(90deg, #fff 14%, #ff0 14%, #ff0 28%, #0ff 28%, #0ff 42%, #0f0 42%, #0f0 56%, #f0f 56%, #f0f 71%, #f00 71%, #f00 85%, #00f 85%); z-index: 110; opacity: 0; pointer-events: none; mix-blend-mode: difference; }
-        
-        .glitch-404 { font-size: clamp(5rem, 20vw, 10rem); font-weight: 700; text-shadow: 3px 0 #f0f, -3px 0 #0ff; display: inline-block; }
-        .btn-pro { background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.4); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; transition: all 0.2s; position: relative; z-index: 200; }
-        .btn-pro:hover { background: var(--ccmn-accent); box-shadow: 0 0 20px var(--ccmn-accent); }
-        
-        /* Warn-Overlay */
-        #warning-overlay { position: fixed; inset: 0; background: #000; z-index: 1000; display: flex; align-items: center; justify-content: center; text-align: center; padding: 20px; }
-        .safe-mode-active #color-bars, .safe-mode-active .glitch-404 { animation: none !important; opacity: 0 !important; text-shadow: none !important; }
+        body { 
+            background-color: var(--ccmn-bg); 
+            color: #f1f5f9; 
+            font-family: 'IBM Plex Mono', monospace; 
+            margin: 0; 
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Effekte über die ganze Fläche */
+        #color-bars { 
+            position: fixed; inset: 0; 
+            background: linear-gradient(90deg, #fff 14%, #ff0 14%, #ff0 28%, #0ff 28%, #0ff 42%, #0f0 42%, #0f0 56%, #f0f 56%, #f0f 71%, #f00 71%, #f00 85%, #00f 85%); 
+            z-index: 50; opacity: 0; pointer-events: none; mix-blend-mode: difference; 
+        }
+
+        .glitch-404 { 
+            font-size: clamp(4rem, 18vw, 9rem); 
+            font-weight: 700; 
+            text-shadow: 3px 0 #f0f, -3px 0 #0ff;
+            display: inline-block;
+            transition: transform 0.1s;
+        }
+
+        /* Deaktiviert Glitch im Safe Mode */
+        .safe-mode-active .glitch-404 { text-shadow: none !important; transform: none !important; }
+        .safe-mode-active #color-bars { display: none !important; }
+
+        /* Warn-Modal */
+        #warning-modal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.9);
+            z-index: 1000; display: none; align-items: center; justify-content: center;
+        }
+
+        .btn-ccmn {
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            background: rgba(59, 130, 246, 0.05);
+            font-size: 11px;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            transition: all 0.2s;
+        }
+        .btn-ccmn:hover { background: var(--ccmn-accent); color: white; box-shadow: 0 0 20px var(--ccmn-accent); }
     </style>
 </head>
-<body class="flex flex-col items-center justify-center">
-
-    <div id="warning-overlay">
-        <div class="max-w-md border border-red-500 p-8 bg-red-950/10">
-            <h2 class="text-red-500 font-bold mb-4 uppercase tracking-tighter text-xl">⚠️ Epilepsie-Warnung</h2>
-            <p class="text-sm mb-6 text-gray-300">Diese Seite enthält schnelle Lichteffekte und Flackern. Möchtest du die visuellen Effekte aktivieren?</p>
-            <div class="flex flex-col gap-3">
-                <button onclick="startPage(false)" class="bg-red-600 p-3 text-xs font-bold uppercase tracking-widest">Effekte Aktivieren</button>
-                <button onclick="startPage(true)" class="border border-gray-600 p-3 text-xs font-bold uppercase tracking-widest">Safe Mode (Kein Flackern)</button>
-            </div>
+<body class="safe-mode-active"> <div id="warning-modal">
+        <div class="max-w-sm border-2 border-red-600 p-8 bg-black text-center">
+            <h2 class="text-red-600 font-bold mb-4">⚠️ SYSTEM-WARNUNG</h2>
+            <p class="text-xs mb-6 text-gray-400">Kritische Systeminstabilität erkannt. Visuelle Flackereffekte aktivieren?</p>
+            <button onclick="setGlitch(true)" class="w-full bg-red-600 py-3 text-[10px] font-bold uppercase mb-3">Ja, volle Last</button>
+            <button onclick="setGlitch(false)" class="w-full border border-gray-600 py-3 text-[10px] font-bold uppercase">Nein, Safe Mode</button>
         </div>
     </div>
 
     <div id="color-bars"></div>
-    <div class="scanlines"></div>
 
-    <main id="content" class="z-10 w-full max-w-3xl p-6 text-center opacity-0 transition-opacity duration-1000">
+    <div class="flex-grow flex flex-col items-center justify-center p-6 text-center">
         <h1 id="404-el" class="glitch-404 italic mb-4">404</h1>
-        <p id="status-text" class="text-red-500 text-[10px] font-bold tracking-[0.4em] mb-12 uppercase">[System_Critical_Failure]</p>
+        <p class="text-red-500 text-[10px] font-bold tracking-[0.4em] mb-12">[SYSTEM_HALT]</p>
         
-        <div class="border-l-2 border-blue-600 bg-blue-900/5 p-6 mb-12 text-left">
-            <p id="joke-output" class="text-blue-400 text-sm md:text-base italic"></p>
+        <div class="w-full max-w-xl border-l-2 border-blue-600 bg-blue-900/5 p-6 mb-12 text-left">
+            <p id="joke-output" class="text-blue-400 text-sm italic"></p>
         </div>
 
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="/" class="btn-pro px-12 py-4 text-white rounded">Back to Home</a>
-            <button onclick="toggleSafeMode()" class="btn-pro px-12 py-4 text-blue-400 rounded">Toggle Safe Mode</button>
+        <div class="flex flex-col sm:flex-row gap-4">
+            <a href="/" class="btn-ccmn px-12 py-4 text-white">Back to Home</a>
+            <button onclick="location.reload()" class="btn-ccmn px-12 py-4 text-blue-400">Reset System</button>
         </div>
-    </main>
+    </div>
 
-    <footer class="fixed bottom-6 w-full px-6 text-center z-50">
-        <p class="text-[8px] text-gray-500 uppercase tracking-widest mb-1">Hobby-Projekt – Nicht kommerziell</p>
-        <p class="text-[8px] text-gray-600 max-w-xl mx-auto mb-2 opacity-60">
-            Dieses Projekt ist ein privates Vorhaben von Schülern für Schüler im Rahmen des CraftCraftMine Netzwerks™. Es besteht keinerlei Gewinnerzielungsabsicht.
-        </p>
-        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">
-            © 2026 CraftCraftMine Netzwerk™
-        </p>
+    <footer class="w-full p-8 border-t border-white/5 bg-black/20 text-center mt-auto">
+        <div class="max-w-2xl mx-auto space-y-2">
+            <p class="text-[8px] text-gray-500 uppercase tracking-widest">Hobby-Projekt – Nicht kommerziell</p>
+            <p class="text-[9px] text-gray-600 leading-relaxed opacity-70">
+                Dieses Projekt ist ein privates Vorhaben von Schülern für Schüler im Rahmen des CraftCraftMine Netzwerks™. Es besteht keinerlei Gewinnerzielungsabsicht.
+            </p>
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] pt-2">
+                © 2026 CraftCraftMine Netzwerk™
+            </p>
+        </div>
     </footer>
 
     <script>
@@ -72,52 +101,51 @@
             '>> "SYSTEM: Die Profis vom Werk sitzen am Ausbügeln ihrer Fehler..."',
             '>> "ERROR: Ein Spieler hat versucht, mit einer Holzhacke Bedrock abzubauen."',
             '>> "WARNUNG: Ein Spieler hat Wasser im Nether platziert. Die Physik weint."',
-            '>> "CRITICAL: Die KI streikt, weil ein Spieler zu viele Hühner gespawnt hat."'
+            '>> "CRITICAL: Jemand hat versucht, den Server mit 1000 TNT-Blöcken zu füttern."'
         ];
 
-        let safeMode = false;
         let damage = 0;
+        let isGlitchActive = false;
+        const el = document.getElementById('404-el');
+        const bars = document.getElementById('color-bars');
 
-        function startPage(isSafe) {
-            safeMode = isSafe;
-            if(isSafe) document.body.classList.add('safe-mode-active');
-            document.getElementById('warning-overlay').style.display = 'none';
-            document.getElementById('content').style.opacity = '1';
-            document.getElementById('joke-output').innerText = jokes[Math.floor(Math.random() * jokes.length)];
-            if(!safeMode) mainLoop();
-        }
+        document.getElementById('joke-output').innerText = jokes[Math.floor(Math.random() * jokes.length)];
 
-        function toggleSafeMode() {
-            safeMode = !safeMode;
-            document.body.classList.toggle('safe-mode-active');
-            if(!safeMode) mainLoop();
-        }
-
+        // Klick-Logik
         window.addEventListener('mousedown', () => {
-            if(!safeMode) {
-                damage += 2;
-                document.body.style.filter = 'brightness(2)';
+            damage++;
+            // Ab 5 Klicks kommt die Warnung, falls noch nicht aktiv
+            if(damage === 5 && !isGlitchActive) {
+                document.getElementById('warning-modal').style.display = 'flex';
+            }
+            
+            if(isGlitchActive) {
+                document.body.style.filter = 'brightness(1.5)';
                 setTimeout(() => document.body.style.filter = 'brightness(1)', 50);
             }
         });
 
+        function setGlitch(activate) {
+            isGlitchActive = activate;
+            document.getElementById('warning-modal').style.display = 'none';
+            if(activate) {
+                document.body.classList.remove('safe-mode-active');
+                mainLoop();
+            }
+        }
+
         function mainLoop() {
-            if(safeMode) return;
+            if(!isGlitchActive) return;
+
+            const intensity = Math.min(damage, 20);
+            el.style.transform = `translate(${(Math.random()-0.5)*intensity}px, ${(Math.random()-0.5)*intensity}px)`;
             
-            const el = document.getElementById('404-el');
-            const bars = document.getElementById('color-bars');
-            
-            // Zufälliges Zittern
-            const offset = 5 + (damage / 2);
-            el.style.transform = `translate(${(Math.random()-0.5)*offset}px, ${(Math.random()-0.5)*offset}px)`;
-            
-            // Zufälliges Flackern
-            if(Math.random() > 0.97) {
+            if(Math.random() > 0.96) {
                 bars.style.opacity = (Math.random() * 0.3).toString();
-                setTimeout(() => bars.style.opacity = "0", 100);
+                setTimeout(() => bars.style.opacity = "0", 80);
             }
 
-            setTimeout(mainLoop, 100 - Math.min(damage, 80));
+            requestAnimationFrame(() => setTimeout(mainLoop, 50));
         }
     </script>
 </body>
