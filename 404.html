@@ -1,15 +1,15 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
 /**
  * Project:     CCMC™ Custom 404 Error Page
  * Part of:     CraftCraftMine Network™ (CCMN™)
  * Copyright:   (c) 2026 CraftCraftMine Network™ – All rights reserved.
  * Info:        https://craftcraftmine.net/ueberuns
  */
-<!DOCTYPE html>
-<html lang="de">
-<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FATAL_ERROR | CCMN™</title>
+    <title>404 - CCMN™</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
@@ -24,91 +24,97 @@
             overflow: hidden;
             user-select: none;
             touch-action: none;
+            height: 100vh;
         }
 
-        /* 404 Glitch Effekt */
+        /* 404 Glitch */
         .glitch-text {
-            font-size: clamp(5rem, 15vw, 8rem);
+            font-size: clamp(4rem, 12vw, 7rem);
             font-weight: 700;
             position: relative;
             text-shadow: 2px 0 #ff00ff, -2px 0 #00ffff;
-            animation: glitch 0.3s infinite alternate-reverse;
+            animation: glitch-anim 0.2s infinite alternate-reverse;
         }
-        @keyframes glitch {
-            0% { transform: translate(1px, 1px); text-shadow: 2px 0 #f0f, -2px 0 #0ff; }
-            100% { transform: translate(-1px, -1px); text-shadow: -2px 0 #f0f, 2px 0 #0ff; }
+        @keyframes glitch-anim {
+            0% { transform: translate(2px, 0.5px); text-shadow: 2px 0 #f0f, -2px 0 #0ff; }
+            100% { transform: translate(-1px, -0.5px); text-shadow: -2px 0 #f0f, 2px 0 #0ff; }
         }
 
-        /* CRT Scanlines */
+        /* Scanlines & Static */
         .scanlines {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), 
-                        linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
-            background-size: 100% 3px, 3px 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+            background-size: 100% 4px;
             pointer-events: none; z-index: 100;
         }
 
-        /* Zufälliges Rauschen (Noise Overlay) */
-        #static-noise {
+        /* Farbbalken Easter Egg Overlay */
+        #color-bars {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: url('https://upload.wikimedia.org/wikipedia/commons/5/5a/Static_noise.gif');
-            opacity: 0; pointer-events: none; z-index: 90;
+            background: linear-gradient(90deg, 
+                #ffffff 14.2%, #ffff00 14.2%, #ffff00 28.4%, 
+                #00ffff 28.4%, #00ffff 42.6%, #00ff00 42.6%, 
+                #00ff00 56.8%, #ff00ff 56.8%, #ff00ff 71%, 
+                #ff0000 71%, #ff0000 85.2%, #0000ff 85.2%);
+            z-index: 150; display: none; opacity: 0.8;
+            mix-blend-mode: screen;
         }
 
-        /* Click/Touch Störung */
         .pixel-burst {
-            position: absolute; width: 50px; height: 50px;
-            background: rgba(59, 130, 246, 0.5);
-            filter: blur(5px); pointer-events: none; z-index: 80;
-            animation: burst 0.4s ease-out forwards;
+            position: absolute; width: 40px; height: 40px;
+            background: rgba(59, 130, 246, 0.6);
+            filter: blur(8px); pointer-events: none; z-index: 80;
+            animation: burst 0.3s ease-out forwards;
         }
-        @keyframes burst {
-            0% { transform: scale(1); opacity: 1; }
-            100% { transform: scale(3) rotate(45deg); opacity: 0; }
-        }
+        @keyframes burst { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(4); opacity: 0; } }
 
-        .shake { animation: shake-anim 0.15s ease-in-out; }
-        @keyframes shake-anim {
-            0% { transform: translate(2px, 2px); }
-            25% { transform: translate(-2px, -2px); }
-            50% { transform: translate(2px, -2px); }
-            100% { transform: translate(0, 0); }
+        /* Profi Buttons */
+        .btn-pro {
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            background: rgba(59, 130, 246, 0.05);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            font-size: 10px;
+            font-weight: 700;
+        }
+        .btn-pro:hover {
+            background: var(--ccmn-accent);
+            color: white;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+            transform: translateY(-2px);
         }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4">
+<body class="flex flex-col items-center justify-center p-4">
     <div class="scanlines"></div>
-    <div id="static-noise"></div>
+    <div id="color-bars"></div>
 
-    <div id="terminal" class="z-10 w-full max-w-2xl border border-blue-900/30 bg-black/60 p-6 md:p-10 rounded-sm backdrop-blur-sm">
-        <div class="flex justify-between text-[10px] text-blue-500 mb-10 border-b border-blue-900/20 pb-2">
-            <span>CORE_OS_RECOVERY_V2</span>
-            <span id="timestamp"></span>
+    <div id="main-frame" class="z-10 w-full max-w-xl p-6 md:p-10 border border-white/5 bg-black/40 backdrop-blur-md rounded-lg shadow-2xl">
+        <div class="flex justify-between text-[9px] text-blue-500/60 mb-12 uppercase tracking-[0.3em]">
+            <span>System.Status: Critical</span>
+            <span id="clock">00:00:00</span>
         </div>
 
         <div class="text-center">
-            <h1 class="glitch-text italic mb-2">404</h1>
-            <p class="text-red-500 text-xs font-bold tracking-widest mb-10">[SEGMENTATION_FAULT]</p>
+            <div class="glitch-text italic mb-4">404</div>
+            <div class="inline-block px-3 py-1 border border-red-500/20 text-red-500 text-[9px] font-bold tracking-widest mb-12">
+                [SEGMENTATION_FAULT_DETECTED]
+            </div>
             
-            <div class="bg-blue-950/20 p-4 rounded border border-blue-900/10 text-left mb-10">
-                <p id="joke-output" class="text-blue-400 text-sm md:text-base leading-relaxed break-words">
-                    >> Initialisiere...
-                </p>
+            <div class="text-left mb-12 min-h-[60px]">
+                <p id="joke-output" class="text-blue-400 text-xs md:text-sm leading-relaxed border-l-2 border-blue-500 pl-4"></p>
             </div>
 
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="/" class="px-8 py-3 bg-blue-600 hover:bg-blue-400 text-white text-[10px] font-bold uppercase tracking-widest transition-all">
-                    System-Reset
-                </a>
-                <a href="https://discord.gg/c5RSbsuMkF" class="px-8 py-3 border border-blue-900 text-blue-400 hover:bg-blue-900/20 text-[10px] font-bold uppercase tracking-widest transition-all">
-                    Notruf absetzen
-                </a>
+                <a href="/" class="btn-pro px-10 py-4 text-white">Reboot</a>
+                <a href="https://discord.gg/c5RSbsuMkF" class="btn-pro px-10 py-4 text-blue-400">Support</a>
             </div>
         </div>
     </div>
 
-    <footer class="fixed bottom-4 text-[8px] text-gray-700 text-center w-full uppercase tracking-widest">
-        © 2026 CraftCraftMine Netzwerk™ | CCMC™ Web-Recovery Unit
+    <footer class="fixed bottom-6 w-full text-center text-[8px] text-gray-700 tracking-[0.5em] uppercase">
+        © 2026 CraftCraftMine Netzwerk™ | CCMC™ Recovery-Unit
     </footer>
 
     <script>
@@ -117,37 +123,53 @@
             '>> "SYSTEM: Die Profis vom Werk sitzen am Ausbügeln ihrer Fehler... bitte warten."',
             '>> "CRITICAL: Ein Spieler hat versehentlich /stop in die Konsole geniest."',
             '>> "INFO: Chunk-Ladefehler. Ein Spieler hat zu viele Armor-Stands platziert."',
-            '>> "STATUS: Suche nach Seite... Gefunden: Nur ein einsames Huhn im Void."',
-            '>> "WARNUNG: Ein Spieler hat Wasser im Nether platziert. Die Physik weint."'
+            '>> "WARNUNG: Ein Spieler hat Wasser im Nether platziert. Die Physik weint."',
+            '>> "ERROR: Das Plugin denkt noch über seine Lebensentscheidungen nach."',
+            '>> "INFO: Ein Spieler hat ein Schild mit \'Kostenlose OP-Rechte\' aufgestellt. System überlastet."'
         ];
 
-        // Zufälligen Witz setzen
+        let clickCount = 0;
+        const mainFrame = document.getElementById('main-frame');
+        const colorBars = document.getElementById('color-bars');
+
+        // Initialer Witz
         document.getElementById('joke-output').innerText = jokes[Math.floor(Math.random() * jokes.length)];
         
-        // Zeitstempel
-        document.getElementById('timestamp').innerText = new Date().toLocaleTimeString();
+        // Uhrzeit
+        setInterval(() => {
+            document.getElementById('clock').innerText = new Date().toLocaleTimeString();
+        }, 1000);
 
-        // Klick-Effekt
+        // Klick-Logik & Easter Egg
         window.addEventListener('mousedown', (e) => {
-            document.body.classList.add('shake');
-            setTimeout(() => document.body.classList.remove('shake'), 150);
+            clickCount++;
+            
+            // Screenshake
+            document.body.style.transform = `translate(${Math.random()*4-2}px, ${Math.random()*4-2}px)`;
+            setTimeout(() => document.body.style.transform = 'none', 50);
 
+            // Burst Effekt
             const burst = document.createElement('div');
             burst.className = 'pixel-burst';
-            burst.style.left = e.pageX - 25 + 'px';
-            burst.style.top = e.pageY - 25 + 'px';
+            burst.style.left = e.pageX - 20 + 'px';
+            burst.style.top = e.pageY - 20 + 'px';
             document.body.appendChild(burst);
-            setTimeout(() => burst.remove(), 400);
-        });
+            setTimeout(() => burst.remove(), 300);
 
-        // Zufälliges Rauschen (Noise)
-        setInterval(() => {
-            if(Math.random() > 0.95) {
-                const noise = document.getElementById('static-noise');
-                noise.style.opacity = "0.2";
-                setTimeout(() => noise.style.opacity = "0", 100);
+            // Easter Egg: Kaputt gehen
+            if (clickCount > 10) {
+                mainFrame.style.opacity = Math.random() > 0.5 ? "0.7" : "1";
+                mainFrame.style.filter = `hue-rotate(${clickCount}deg)`;
             }
-        }, 500);
+            if (clickCount > 20) {
+                colorBars.style.display = Math.random() > 0.7 ? "block" : "none";
+            }
+            if (clickCount > 30) {
+                colorBars.style.display = "block";
+                colorBars.style.opacity = "1";
+                document.getElementById('joke-output').innerText = '>> "TOTALSYSTEMAUSFALL: ZU VIELE KLICKS. SPIELER-KOMPETENZ NICHT GEFUNDEN."';
+            }
+        });
     </script>
 </body>
 </html>
