@@ -21,36 +21,42 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            overflow-x: hidden;
         }
 
-        /* Effekte über die ganze Fläche */
+        /* Hintergrund-Effekt */
         #color-bars { 
             position: fixed; inset: 0; 
             background: linear-gradient(90deg, #fff 14%, #ff0 14%, #ff0 28%, #0ff 28%, #0ff 42%, #0f0 42%, #0f0 56%, #f0f 56%, #f0f 71%, #f00 71%, #f00 85%, #00f 85%); 
-            z-index: 50; opacity: 0; pointer-events: none; mix-blend-mode: difference; 
+            z-index: 5; opacity: 0; pointer-events: none; mix-blend-mode: difference; 
         }
 
+        /* Die 404 mit leichtem Dauer-Zittern */
         .glitch-404 { 
             font-size: clamp(4rem, 18vw, 9rem); 
             font-weight: 700; 
-            text-shadow: 3px 0 #f0f, -3px 0 #0ff;
             display: inline-block;
-            transition: transform 0.1s;
+            position: relative;
+            text-shadow: 2px 0 #f0f, -2px 0 #0ff;
+            animation: subtle-shake 2s infinite;
         }
 
-        /* Deaktiviert Glitch im Safe Mode */
-        .safe-mode-active .glitch-404 { text-shadow: none !important; transform: none !important; }
-        .safe-mode-active #color-bars { display: none !important; }
+        @keyframes subtle-shake {
+            0% { transform: translate(0,0); }
+            10% { transform: translate(1px, -1px); }
+            20% { transform: translate(-1px, 1px); }
+            100% { transform: translate(0,0); }
+        }
 
         /* Warn-Modal */
         #warning-modal {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.9);
+            position: fixed; inset: 0; background: rgba(0,0,0,0.95);
             z-index: 1000; display: none; align-items: center; justify-content: center;
         }
 
         .btn-ccmn {
             border: 1px solid rgba(59, 130, 246, 0.4);
-            background: rgba(59, 130, 246, 0.05);
+            background: rgba(59, 130, 246, 0.1);
             font-size: 11px;
             letter-spacing: 0.2em;
             text-transform: uppercase;
@@ -59,38 +65,40 @@
         .btn-ccmn:hover { background: var(--ccmn-accent); color: white; box-shadow: 0 0 20px var(--ccmn-accent); }
     </style>
 </head>
-<body class="safe-mode-active"> <div id="warning-modal">
-        <div class="max-w-sm border-2 border-red-600 p-8 bg-black text-center">
+<body>
+
+    <div id="warning-modal">
+        <div class="max-w-sm border-2 border-red-600 p-8 bg-black text-center mx-4">
             <h2 class="text-red-600 font-bold mb-4">⚠️ SYSTEM-WARNUNG</h2>
-            <p class="text-xs mb-6 text-gray-400">Kritische Systeminstabilität erkannt. Visuelle Flackereffekte aktivieren?</p>
+            <p class="text-xs mb-6 text-gray-400">Hohe Systemlast erkannt. Möchtest du die intensiven Flackereffekte für den "Totalausfall-Look" aktivieren?</p>
             <button onclick="setGlitch(true)" class="w-full bg-red-600 py-3 text-[10px] font-bold uppercase mb-3">Ja, volle Last</button>
-            <button onclick="setGlitch(false)" class="w-full border border-gray-600 py-3 text-[10px] font-bold uppercase">Nein, Safe Mode</button>
+            <button onclick="setGlitch(false)" class="w-full border border-gray-600 py-3 text-[10px] font-bold uppercase">Nein, im Safe Mode bleiben</button>
         </div>
     </div>
 
     <div id="color-bars"></div>
 
-    <div class="flex-grow flex flex-col items-center justify-center p-6 text-center">
+    <main class="flex-grow flex flex-col items-center justify-center p-6 text-center">
         <h1 id="404-el" class="glitch-404 italic mb-4">404</h1>
-        <p class="text-red-500 text-[10px] font-bold tracking-[0.4em] mb-12">[SYSTEM_HALT]</p>
+        <p class="text-red-500 text-[10px] font-bold tracking-[0.4em] mb-12 uppercase">[SYSTEM_DEGRADED]</p>
         
         <div class="w-full max-w-xl border-l-2 border-blue-600 bg-blue-900/5 p-6 mb-12 text-left">
             <p id="joke-output" class="text-blue-400 text-sm italic"></p>
         </div>
 
         <div class="flex flex-col sm:flex-row gap-4">
-            <a href="/" class="btn-ccmn px-12 py-4 text-white">Back to Home</a>
-            <button onclick="location.reload()" class="btn-ccmn px-12 py-4 text-blue-400">Reset System</button>
+            <a href="/" class="btn-ccmn px-12 py-4 text-white rounded">Zurück zur Homepage</a>
+            <button onclick="location.reload()" class="btn-ccmn px-12 py-4 text-blue-400 rounded">System-Neustart</button>
         </div>
-    </div>
+    </main>
 
-    <footer class="w-full p-8 border-t border-white/5 bg-black/20 text-center mt-auto">
-        <div class="max-w-2xl mx-auto space-y-2">
-            <p class="text-[8px] text-gray-500 uppercase tracking-widest">Hobby-Projekt – Nicht kommerziell</p>
-            <p class="text-[9px] text-gray-600 leading-relaxed opacity-70">
+    <footer class="w-full p-8 border-t border-white/5 bg-black/40 text-center mt-auto">
+        <div class="max-w-2xl mx-auto">
+            <p class="text-[8px] text-gray-500 uppercase tracking-widest mb-2">Hobby-Projekt – Nicht kommerziell</p>
+            <p class="text-[9px] text-gray-600 leading-relaxed opacity-80 mb-4">
                 Dieses Projekt ist ein privates Vorhaben von Schülern für Schüler im Rahmen des CraftCraftMine Netzwerks™. Es besteht keinerlei Gewinnerzielungsabsicht.
             </p>
-            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] pt-2">
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">
                 © 2026 CraftCraftMine Netzwerk™
             </p>
         </div>
@@ -101,7 +109,7 @@
             '>> "SYSTEM: Die Profis vom Werk sitzen am Ausbügeln ihrer Fehler..."',
             '>> "ERROR: Ein Spieler hat versucht, mit einer Holzhacke Bedrock abzubauen."',
             '>> "WARNUNG: Ein Spieler hat Wasser im Nether platziert. Die Physik weint."',
-            '>> "CRITICAL: Jemand hat versucht, den Server mit 1000 TNT-Blöcken zu füttern."'
+            '>> "INFO: Chunk loading failed. Jemand hat die Redstone-Leitung mit Lava geflutet."'
         ];
 
         let damage = 0;
@@ -111,41 +119,40 @@
 
         document.getElementById('joke-output').innerText = jokes[Math.floor(Math.random() * jokes.length)];
 
-        // Klick-Logik
+        // Klick-Reaktion
         window.addEventListener('mousedown', () => {
             damage++;
-            // Ab 5 Klicks kommt die Warnung, falls noch nicht aktiv
-            if(damage === 5 && !isGlitchActive) {
+            // Ab 7 Klicks kommt die Warnung für die heftigen Effekte
+            if(damage === 7 && !isGlitchActive) {
                 document.getElementById('warning-modal').style.display = 'flex';
             }
             
             if(isGlitchActive) {
-                document.body.style.filter = 'brightness(1.5)';
-                setTimeout(() => document.body.style.filter = 'brightness(1)', 50);
+                document.body.style.filter = 'brightness(1.4)';
+                setTimeout(() => document.body.style.filter = 'brightness(1)', 40);
             }
         });
 
         function setGlitch(activate) {
             isGlitchActive = activate;
             document.getElementById('warning-modal').style.display = 'none';
-            if(activate) {
-                document.body.classList.remove('safe-mode-active');
-                mainLoop();
-            }
+            if(activate) mainLoop();
         }
 
         function mainLoop() {
             if(!isGlitchActive) return;
 
-            const intensity = Math.min(damage, 20);
+            // Intensität steigt mit Klicks
+            const intensity = Math.min(damage, 30);
             el.style.transform = `translate(${(Math.random()-0.5)*intensity}px, ${(Math.random()-0.5)*intensity}px)`;
             
-            if(Math.random() > 0.96) {
-                bars.style.opacity = (Math.random() * 0.3).toString();
-                setTimeout(() => bars.style.opacity = "0", 80);
+            // Zufälliger Farbbalken-Blitz
+            if(Math.random() > 0.97) {
+                bars.style.opacity = (Math.random() * 0.4).toString();
+                setTimeout(() => bars.style.opacity = "0", 70);
             }
 
-            requestAnimationFrame(() => setTimeout(mainLoop, 50));
+            requestAnimationFrame(() => setTimeout(mainLoop, 40));
         }
     </script>
 </body>
