@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Seite nicht gefunden | CCMN</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ccmn-bg: #09090d;
+            --ccmn-accent: #3b82f6;
+        }
+        body { 
+            background-color: var(--ccmn-bg); 
+            color: #f1f5f9; 
+            font-family: 'IBM+Plex+Sans', sans-serif; 
+        }
+        .mono { font-family: 'IBM+Plex+Mono', monospace; }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); }
+        .accent-button { background-color: var(--ccmn-accent); transition: transform 0.2s, background-color 0.2s; }
+        .accent-button:hover { background-color: #2563eb; transform: scale(1.05); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+    <div class="flex-grow flex items-center justify-center px-6">
+        <div class="max-w-md w-full text-center">
+            <div class="glass p-10 rounded-3xl shadow-2xl">
+                <h1 class="mono text-7xl font-bold text-blue-500 mb-4">404</h1>
+                <h2 class="text-xl font-semibold mb-2 uppercase tracking-wider">Verbindung verloren</h2>
+                <p class="text-gray-400 text-sm mb-8 leading-relaxed">
+                    Die angeforderte Ressource konnte im <span class="mono text-blue-400">CCMN-Grid</span> nicht lokalisiert werden. Möglicherweise wurde der Pfad verschoben oder gelöscht.
+                </p>
+                
+                <a href="/" class="accent-button inline-block w-full py-3 rounded-xl font-bold text-sm uppercase tracking-widest shadow-lg">
+                    Zurück zum Hauptmenü
+                </a>
+            </div>
+            
+            <div class="mt-6 mono text-[10px] text-gray-600 uppercase tracking-tighter">
+                Fehler-Code: ERR_CCMC_RESOURCE_NOT_FOUND
+            </div>
+        </div>
+    </div>
+
+    <footer class="w-full py-10 px-6 text-center border-t border-white/5 bg-black/20">
+        <div class="max-w-4xl mx-auto">
+            <p class="text-gray-500 text-[10px] tracking-widest uppercase mb-2">Hobby-Projekt – Nicht kommerziell</p>
+            <p class="text-gray-600 text-[10px] leading-relaxed mb-4">
+                Dieses Projekt ist ein privates, schulisches Vorhaben von Schülern für Schüler im Rahmen des CraftCraftMine Netzwerks™. 
+                Es besteht keinerlei Gewinnerzielungsabsicht. Alle Inhalte dienen ausschließlich der Unterhaltung und Simulation.
+            </p>
+            <p class="text-gray-500 text-[10px] mono">
+                Kontakt & Support: <a href="mailto:support@craftcraftmine.net" class="hover:text-blue-500">support@craftcraftmine.net</a>
+            </p>
+            <p class="text-gray-400 text-[11px] font-bold mt-4 uppercase">
+                © 2026 CraftCraftMine Netzwerk™
+            </p>
+        </div>
+    </footer>
+
+</body>
+</html>
