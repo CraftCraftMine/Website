@@ -1,0 +1,471 @@
+<!--
+  Project:     CraftCraftMine Info Center
+  Part of:     CraftCraftMine Netzwerk™ (CCMN™)
+  Copyright:   (c) 2026 CraftCraftMine Netzwerk™ – All rights reserved.
+  Description: Privates Hobby-Projekt für das CraftCraftMine Netzwerk.
+               Nicht für kommerzielle Zwecke bestimmt.
+  Letzte Änderung: 07.04.2026
+  Support:     support@craftcraftmine.net
+  Info:        https://craftcraftmine.net/ueberuns
+
+  CCMC™ = CraftCraftMine Code™ · CCMN™ = CraftCraftMine Netzwerk™
+-->
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Info Center – CraftCraftMine</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="news.js"></script>
+<script src="changelog.js"></script>
+<style>
+  :root {
+    --bg:     #080c0e;
+    --card:   #111a1f;
+    --card2:  #162020;
+    --border: #243030;
+    --red:    #ef4444;
+    --green:  #22c55e;
+    --text:   #e2ffe8;
+    --muted:  #5a8a68;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  .grid-bg {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 48px 48px;
+    opacity: 0.4;
+  }
+  .wrap { position: relative; z-index: 1; }
+
+  /* ── Header ── */
+  .hdr {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10,18,16,0.97);
+    border-bottom: 1px solid var(--border);
+    padding: 11px 20px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .hamburger {
+    width: 38px; height: 38px; border-radius: 7px;
+    background: var(--card2); border: 1px solid var(--border);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+    cursor: pointer; transition: all .2s; flex-shrink: 0;
+  }
+  .hamburger:hover { border-color: var(--green); }
+  .hamburger span {
+    display: block; width: 18px; height: 2px;
+    background: var(--muted); border-radius: 2px; transition: all .2s;
+  }
+  .hamburger:hover span { background: var(--green); }
+  .hdr-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 20px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+    background: linear-gradient(135deg, #4ade80, #86efac);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .hdr-sub { font-size: 9px; color: var(--muted); letter-spacing: .15em; text-transform: uppercase; }
+  .hdr-current {
+    margin-left: auto;
+    font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--green); opacity: .7;
+  }
+
+  /* ── Slide-in Menü ── */
+  .menu-panel {
+    position: fixed; top: 0; left: 0; bottom: 0;
+    width: 280px; z-index: 300;
+    background: #0d1a14;
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    transform: translateX(-100%);
+    transition: transform .28s cubic-bezier(.4,0,.2,1);
+  }
+  .menu-panel.open { transform: translateX(0); }
+  .menu-top {
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .menu-logo {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+    background: linear-gradient(135deg, #4ade80, #86efac);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .menu-close {
+    width: 30px; height: 30px; border-radius: 5px;
+    background: rgba(255,255,255,.04); border: 1px solid var(--border);
+    color: var(--muted); cursor: pointer; font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .2s;
+  }
+  .menu-close:hover { border-color: #ef4444; color: #ef4444; }
+  .menu-nav { padding: 10px 10px; flex: 1; }
+  .menu-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 11px 14px; border-radius: 8px;
+    cursor: pointer; transition: all .18s;
+    margin-bottom: 3px; text-decoration: none; color: var(--text);
+    border: 1px solid transparent;
+  }
+  .menu-item:hover { background: rgba(34,197,94,.07); border-color: rgba(34,197,94,.15); }
+  .menu-item.active { background: rgba(34,197,94,.1); border-color: rgba(34,197,94,.25); color: var(--green); }
+  .menu-item.back { color: var(--muted); }
+  .menu-item.back:hover { background: rgba(255,255,255,.04); border-color: var(--border); color: var(--text); }
+  .menu-icon { font-size: 18px; width: 26px; text-align: center; flex-shrink: 0; }
+  .menu-label { font-size: 13px; font-weight: 600; letter-spacing: .03em; }
+  .menu-sub { font-size: 10px; color: var(--muted); margin-top: 1px; }
+  .menu-divider { height: 1px; background: var(--border); margin: 8px 14px; }
+  .menu-footer {
+    padding: 14px 20px;
+    border-top: 1px solid var(--border);
+    font-size: 9px; color: var(--muted); letter-spacing: .08em; text-transform: uppercase;
+  }
+
+  /* Overlay – kein blur! */
+  .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:299; }
+  .overlay.on { display:block; }
+
+  /* ── Content ── */
+  .content { max-width: 860px; margin: 0 auto; padding: 28px 24px; }
+  @media (max-width: 540px) { .content { padding: 18px 14px; } }
+
+  .sec-lbl {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 18px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .sec-lbl::after { content:''; flex:1; height:1px; background: linear-gradient(90deg, var(--border), transparent); }
+
+  /* ── News & Changelog Karten ── */
+  .cl {
+    background: var(--card); border: 1px solid var(--border);
+    border-left: 3px solid transparent;
+    border-radius: 9px; padding: 15px 18px; margin-bottom: 10px;
+    transition: border-color .18s;
+  }
+  .cl.neu      { border-left-color: #22c55e; }
+  .cl.update   { border-left-color: #3b82f6; }
+  .cl.bugfix   { border-left-color: #ef4444; }
+  .cl.wartung  { border-left-color: #64748b; }
+  .cl.info     { border-left-color: #a855f7; }
+  .cl.event    { border-left-color: #f59e0b; }
+  .cl:hover    { border-color: #2a3d35; }
+
+  .cl-top { display:flex; align-items:center; flex-wrap:wrap; gap:9px; margin-bottom:9px; }
+  .cl-tag {
+    font-size: 8px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+    padding: 2px 9px; border-radius: 3px;
+  }
+  .neu    .cl-tag { background:rgba(34,197,94,.1);  color:#4ade80; border:1px solid rgba(34,197,94,.22); }
+  .update .cl-tag { background:rgba(59,130,246,.1); color:#60a5fa; border:1px solid rgba(59,130,246,.22); }
+  .bugfix .cl-tag { background:rgba(239,68,68,.1);  color:#f87171; border:1px solid rgba(239,68,68,.22); }
+  .wartung .cl-tag{ background:rgba(100,116,139,.1);color:#94a3b8; border:1px solid rgba(100,116,139,.22); }
+  .info   .cl-tag { background:rgba(168,85,247,.1); color:#c084fc; border:1px solid rgba(168,85,247,.22); }
+  .event  .cl-tag { background:rgba(245,158,11,.1); color:#fbbf24; border:1px solid rgba(245,158,11,.22); }
+
+  .cl-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px; font-weight: 700; letter-spacing: .03em; flex: 1;
+  }
+  .cl-date { font-size: 10px; color: var(--muted); white-space: nowrap; }
+  .cl-txt {
+    font-size: 13px; color: #78a885; line-height: 1.75;
+    overflow: hidden; transition: max-height .35s ease;
+  }
+  .cl-txt.col { max-height: 44px; }
+  .cl-txt.exp { max-height: 600px; }
+  .cl-more {
+    display: inline-flex; align-items: center; gap: 4px;
+    margin-top: 7px; font-size: 10px; font-weight: 600;
+    color: var(--green); background: none; border: none;
+    cursor: pointer; letter-spacing: .05em; padding: 0; transition: opacity .18s;
+  }
+  .cl-more:hover { opacity: .6; }
+
+  /* ── Spiele Grid ── */
+  .games-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 14px;
+  }
+  .g-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; overflow: hidden;
+    transition: all .2s; cursor: pointer;
+  }
+  .g-card:hover { border-color: var(--green); box-shadow: 0 0 20px rgba(34,197,94,.1); transform: translateY(-2px); }
+  .g-img {
+    width: 100%; aspect-ratio: 16/9;
+    background: linear-gradient(135deg, #0c1e12, #172414);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; overflow: hidden;
+  }
+  .g-img img { width:100%; height:100%; object-fit:cover; display:block; }
+  .g-body { padding: 10px 12px; }
+  .g-plat { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 3px; }
+  .g-name { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.3; margin-bottom: 4px; }
+  .g-until { font-size: 9px; color: #f87171; margin-bottom: 10px; }
+  .g-btns { display: flex; gap: 6px; }
+  .gbtn {
+    flex: 1; text-align: center; font-size: 10px; font-weight: 700;
+    letter-spacing: .04em; text-transform: uppercase;
+    padding: 6px 4px; border-radius: 5px; text-decoration: none; transition: all .18s;
+  }
+  .gbtn-s { background: linear-gradient(135deg, #ef4444, #b91c1c); color: #fff; }
+  .gbtn-s:hover { opacity: .85; }
+  .gbtn-d { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+  .gbtn-d:hover { border-color: var(--green); color: var(--green); }
+
+  /* Skeleton */
+  .sk { background: linear-gradient(90deg, #111a1f 25%, #16231c 50%, #111a1f 75%); background-size: 200% 100%; animation: sh 1.6s infinite; border-radius: 3px; }
+  @keyframes sh { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+  /* Ladehinweis */
+  .loading {
+    text-align: center; padding: 40px 20px;
+    color: var(--muted); font-size: 13px;
+  }
+  .err {
+    background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.2);
+    border-radius: 8px; padding: 14px 18px;
+    color: #f87171; font-size: 12px; line-height: 1.6;
+  }
+
+  /* Tabs */
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="wrap">
+
+  <!-- Header -->
+  <div class="hdr">
+    <div class="hamburger" onclick="openMenu()">
+      <span></span><span></span><span></span>
+    </div>
+    <div>
+      <div class="hdr-title">Info Center</div>
+      <div class="hdr-sub">CraftCraftMine Netzwerk™</div>
+    </div>
+    <div class="hdr-current" id="hdr-current">News</div>
+  </div>
+
+  <!-- Slide-in Menü -->
+  <div class="menu-panel" id="menu">
+    <div class="menu-top">
+      <div class="menu-logo">CCMN™ Navigation</div>
+      <button class="menu-close" onclick="closeMenu()">✕</button>
+    </div>
+    <div class="menu-nav">
+
+      <a href="/" class="menu-item back">
+        <div class="menu-icon">←</div>
+        <div>
+          <div class="menu-label">Zurück zur Startseite</div>
+          <div class="menu-sub">craftcraftmine.net</div>
+        </div>
+      </a>
+
+      <div class="menu-divider"></div>
+
+      <div class="menu-item active" id="nav-news" onclick="switchTab('news')">
+        <div class="menu-icon">📰</div>
+        <div>
+          <div class="menu-label">News</div>
+          <div class="menu-sub">CCMN™ Neuigkeiten</div>
+        </div>
+      </div>
+
+      <div class="menu-item" id="nav-spiele" onclick="switchTab('spiele')">
+        <div class="menu-icon">🎮</div>
+        <div>
+          <div class="menu-label">Kostenlose Spiele</div>
+          <div class="menu-sub">Via GamerPower API · Live</div>
+        </div>
+      </div>
+
+      <div class="menu-item" id="nav-changelog" style="opacity:.35;pointer-events:none;">
+        <div class="menu-icon">📋</div>
+        <div>
+          <div class="menu-label">Changelog</div>
+          <div class="menu-sub">Kommt bald</div>
+        </div>
+      </div>
+
+    </div>
+    <div class="menu-footer">© 2026 CraftCraftMine Netzwerk™</div>
+  </div>
+
+  <!-- Overlay -->
+  <div class="overlay" id="ov" onclick="closeMenu()"></div>
+
+  <!-- Content -->
+  <div class="content">
+
+    <!-- News Tab -->
+    <div class="tab-content active" id="tab-news">
+      <div class="sec-lbl">News</div>
+      <div id="news-container"><div class="loading">Lade News…</div></div>
+    </div>
+
+    <!-- Spiele Tab -->
+    <div class="tab-content" id="tab-spiele">
+      <div class="sec-lbl">Kostenlose Spiele</div>
+      <div id="games-container"><div class="loading">Lade Spiele…</div></div>
+    </div>
+
+    <!-- Changelog Tab (zukünftig) -->
+    <div class="tab-content" id="tab-changelog">
+      <div class="sec-lbl">Changelog</div>
+      <div id="changelog-container"><div class="loading">Lade Changelog…</div></div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <footer style="border-top:1px solid var(--border);padding:20px 24px;max-width:860px;margin:40px auto 0;">
+    <div style="font-family:'Rajdhani',sans-serif;font-size:10px;color:var(--green);letter-spacing:2px;margin-bottom:6px;">CCMN™ · CraftCraftMine Netzwerk™</div>
+    <div style="font-size:10px;color:var(--muted);line-height:1.7;">
+      Privates Hobby-Projekt. Nicht für kommerzielle Zwecke bestimmt.<br>
+      © 2026 CraftCraftMine Netzwerk™ · CCMC™ = CraftCraftMine Code™<br>
+      Support: <a href="mailto:support@craftcraftmine.net" style="color:var(--green);">support@craftcraftmine.net</a>
+      &nbsp;·&nbsp;
+      <a href="https://craftcraftmine.net/ueberuns" style="color:var(--green);" target="_blank">craftcraftmine.net/ueberuns</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+/* ── Navigation ── */
+const TABS = ['news','spiele','changelog'];
+const LABELS = { news:'News', spiele:'Kostenlose Spiele', changelog:'Changelog' };
+
+function openMenu()  { document.getElementById('menu').classList.add('open');  document.getElementById('ov').classList.add('on'); }
+function closeMenu() { document.getElementById('menu').classList.remove('open'); document.getElementById('ov').classList.remove('on'); }
+
+function switchTab(name) {
+  TABS.forEach(t => {
+    document.getElementById('tab-'+t).classList.toggle('active', t === name);
+    const nav = document.getElementById('nav-'+t);
+    if (nav) nav.classList.toggle('active', t === name);
+  });
+  document.getElementById('hdr-current').textContent = LABELS[name] || '';
+  closeMenu();
+  if (name === 'spiele' && !gamesLoaded) loadGames();
+}
+
+/* ── Ausklappen ── */
+function expand(id, btn) {
+  const el = document.getElementById(id);
+  const isExp = el.classList.toggle('exp');
+  el.classList.toggle('col', !isExp);
+  btn.textContent = isExp ? 'Weniger anzeigen ▲' : 'Mehr anzeigen ▼';
+}
+
+/* ── News aus news.js rendern ── */
+function renderNews() {
+  const c = document.getElementById('news-container');
+  if (typeof NEWS_ENTRIES === 'undefined' || NEWS_ENTRIES.length === 0) {
+    c.innerHTML = '<div class="err">Keine News vorhanden.</div>';
+    return;
+  }
+  c.innerHTML = NEWS_ENTRIES.map((n, i) => {
+    const needsMore = n.text && n.text.length > 120;
+    const id = 'ntxt-' + i;
+    return `
+      <div class="cl ${n.tag || 'info'}">
+        <div class="cl-top">
+          <span class="cl-tag">${n.tag || 'Info'}</span>
+          <span class="cl-title">${n.title}</span>
+          <span class="cl-date">${n.date}</span>
+        </div>
+        <div class="cl-txt ${needsMore ? 'col' : 'exp'}" id="${id}">${n.text || ''}</div>
+        ${needsMore ? `<button class="cl-more" onclick="expand('${id}',this)">Mehr anzeigen ▼</button>` : ''}
+      </div>`;
+  }).join('');
+}
+
+/* ── Spiele via GamerPower API ── */
+let gamesLoaded = false;
+async function loadGames() {
+  gamesLoaded = true;
+  const c = document.getElementById('games-container');
+  try {
+    const res = await fetch('https://www.gamerpower.com/api/giveaways?platform=steam&type=game&sort-by=popularity');
+    if (!res.ok) throw new Error('API Fehler ' + res.status);
+    const data = await res.json();
+    if (!data || data.length === 0) { c.innerHTML = '<div class="err">Aktuell keine kostenlosen Spiele verfügbar.</div>'; return; }
+    c.innerHTML = '<div class="games-grid">' + data.slice(0, 12).map(g => {
+      const until = g.end_date && g.end_date !== 'N/A'
+        ? 'Bis ' + new Date(g.end_date).toLocaleDateString('de-DE', {day:'2-digit',month:'short',year:'numeric'})
+        : 'Zeitlich begrenzt';
+      const appId = g.open_giveaway_url?.match(/steam.*?\/app\/(\d+)/)?.[1] || '';
+      const steamUrl = appId ? `https://store.steampowered.com/app/${appId}` : g.open_giveaway_url;
+      const dbUrl   = appId ? `https://www.steamdb.info/app/${appId}` : '#';
+      return `
+        <div class="g-card">
+          <div class="g-img"><img src="${g.thumbnail}" alt="${g.title}" loading="lazy" onerror="this.parentNode.innerHTML='🎮'"></div>
+          <div class="g-body">
+            <div class="g-plat">${g.platforms || 'Steam'}</div>
+            <div class="g-name">${g.title}</div>
+            <div class="g-until">${until}</div>
+            <div class="g-btns">
+              <a href="${steamUrl}" target="_blank" rel="noopener" class="gbtn gbtn-s">Steam</a>
+              <a href="${dbUrl}" target="_blank" rel="noopener" class="gbtn gbtn-d">SteamDB</a>
+            </div>
+          </div>
+        </div>`;
+    }).join('') + '</div>';
+  } catch(e) {
+    c.innerHTML = `<div class="err">Fehler beim Laden der Spiele: ${e.message}</div>`;
+  }
+}
+
+/* ── Changelog aus changelog.js rendern ── */
+function renderChangelog() {
+  const c = document.getElementById('changelog-container');
+  if (typeof CHANGELOG_ENTRIES === 'undefined' || CHANGELOG_ENTRIES.length === 0) {
+    c.innerHTML = '<div class="err">Kein Changelog vorhanden.</div>';
+    return;
+  }
+  c.innerHTML = CHANGELOG_ENTRIES.map((n, i) => {
+    const needsMore = n.text && n.text.length > 120;
+    const id = 'ctxt-' + i;
+    return `
+      <div class="cl ${n.tag || 'update'}">
+        <div class="cl-top">
+          <span class="cl-tag">${n.tag || 'Update'}</span>
+          <span class="cl-title">${n.title}</span>
+          <span class="cl-date">${n.date}</span>
+        </div>
+        <div class="cl-txt ${needsMore ? 'col' : 'exp'}" id="${id}">${n.text || ''}</div>
+        ${needsMore ? `<button class="cl-more" onclick="expand('${id}',this)">Mehr anzeigen ▼</button>` : ''}
+      </div>`;
+  }).join('');
+}
+
+/* ── Init ── */
+document.addEventListener('DOMContentLoaded', () => {
+  renderNews();
+  renderChangelog();
+});
+</script>
+</body>
+</html>
