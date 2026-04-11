@@ -408,7 +408,7 @@ async function loadGames() {
   gamesLoaded = true;
   const c = document.getElementById('games-container');
   try {
-    const res = await fetch('https://www.gamerpower.com/api/giveaways?platform=steam&type=game&sort-by=popularity');
+    const res = await fetch('/api/games');
     if (!res.ok) throw new Error('API Fehler ' + res.status);
     const data = await res.json();
     if (!data || data.length === 0) { c.innerHTML = '<div class="err">Aktuell keine kostenlosen Spiele verfügbar.</div>'; return; }
@@ -416,19 +416,16 @@ async function loadGames() {
       const until = g.end_date && g.end_date !== 'N/A'
         ? 'Bis ' + new Date(g.end_date).toLocaleDateString('de-DE', {day:'2-digit',month:'short',year:'numeric'})
         : 'Zeitlich begrenzt';
-      const appId = g.open_giveaway_url?.match(/steam.*?\/app\/(\d+)/)?.[1] || '';
-      const steamUrl = appId ? `https://store.steampowered.com/app/${appId}` : g.open_giveaway_url;
-      const dbUrl   = appId ? `https://www.steamdb.info/app/${appId}` : '#';
       return `
         <div class="g-card">
           <div class="g-img"><img src="${g.thumbnail}" alt="${g.title}" loading="lazy" onerror="this.parentNode.innerHTML='🎮'"></div>
           <div class="g-body">
-            <div class="g-plat">${g.platforms || 'Steam'}</div>
+            <div class="g-plat">${g.platform || 'Steam'}</div>
             <div class="g-name">${g.title}</div>
             <div class="g-until">${until}</div>
             <div class="g-btns">
-              <a href="${steamUrl}" target="_blank" rel="noopener" class="gbtn gbtn-s">Steam</a>
-              <a href="${dbUrl}" target="_blank" rel="noopener" class="gbtn gbtn-d">SteamDB</a>
+              <a href="${g.steam_url}" target="_blank" rel="noopener" class="gbtn gbtn-s">Steam</a>
+              <a href="${g.steamdb_url || '#'}" target="_blank" rel="noopener" class="gbtn gbtn-d">SteamDB</a>
             </div>
           </div>
         </div>`;
