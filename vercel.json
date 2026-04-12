@@ -1,6 +1,6 @@
 {
   "trailingSlash": true,
   "rewrites": [
-    { "source": "/api/games", "destination": "/api/games.js" }
+    { "source": "/api/:path*/", "destination": "/api/:path*" }
   ]
 }
